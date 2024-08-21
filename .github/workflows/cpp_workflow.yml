@@ -73,3 +73,9 @@ jobs:
         run: |
           cd cpp/build && CTEST_OUTPUT_ON_FAILURE=TRUE ctest
           make cov
+      - uses: webiny/action-post-run@3.1.0
+        id: post-run-command
+        with:
+          if: runner.os == 'Linux'
+          run: cat vcpkg/buildtrees/libhdfs3/config-x64-linux-dbg-err.log
+          working-directory: /home/runner/work/WeDPR-Component/WeDPR-Component/
