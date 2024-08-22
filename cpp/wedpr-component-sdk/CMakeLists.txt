@@ -1,4 +1,4 @@
-project(wedpr-component-c-sdk VERSION ${VERSION})
+project(wedpr-component-sdk VERSION ${VERSION})
 
 # export windows dll symbol
 if(WIN32)
@@ -6,7 +6,7 @@ if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
 endif()
 add_subdirectory(ppc-crypto-c-sdk)
-add_subdirectory(ppc-front-c-sdk)
+add_subdirectory(wedpr-front-cpp-sdk)
 
 if (TESTS)
     enable_testing()

@@ -52,6 +52,7 @@ macro(configure_project)
     default_option(BUILD_ALL ON)
     default_option(BUILD_SDK OFF)
     default_option(BUILD_UDF OFF)
+    default_option(BUILD_WEDPR_TOOLKIT OFF)
 
     # Suffix like "-rc1" e.t.c. to append to versions wherever needed.
     if (NOT DEFINED VERSION_SUFFIX)
