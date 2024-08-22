@@ -1,0 +1,16 @@
+{
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/FISCO-BCOS/registry",
+      "baseline": "070f336149afdac5cc9ace97df01de7ee31aab30",
+      "packages": [
+        "openssl",
+        "bcos-utilities",
+        "bcos-boostssl",
+        "tarscpp",
+        "libhdfs3"
+      ]
+    }
+  ]
+}
