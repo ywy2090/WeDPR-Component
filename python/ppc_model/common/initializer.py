@@ -1,6 +1,7 @@
 import logging
 import logging.config
 import os
+import threading
 
 import yaml
 
@@ -14,7 +15,7 @@ from ppc_model.task.task_manager import TaskManager
 
 
 class Initializer:
-    def __init__(self, log_config_path, config_path):
+    def __init__(self, log_config_path, config_path, plot_lock=None):
         self.log_config_path = log_config_path
         self.config_path = config_path
         self.config_data = None
@@ -27,6 +28,10 @@ class Initializer:
         self.mock_logger = None
         self.public_key_length = 2048
         self.homo_algorithm = 0
+        # matplotlib 线程不安全，并行任务绘图增加全局锁
+        self.plot_lock = plot_lock
+        if plot_lock is None:
+            self.plot_lock = threading.Lock()
 
     def init_all(self):
         self.init_log()

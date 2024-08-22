@@ -97,8 +97,9 @@ class TestXgboostTraining(unittest.TestCase):
 
     def test_fit(self):
         args_a, args_b = mock_args()
+        plot_lock = threading.Lock()
 
-        active_components = Initializer(log_config_path='', config_path='')
+        active_components = Initializer(log_config_path='', config_path='', plot_lock=plot_lock)
         active_components.stub = self._active_stub
         active_components.config_data = {
             'JOB_TEMP_DIR': '/tmp/active', 'AGENCY_ID': ACTIVE_PARTY}
@@ -114,7 +115,8 @@ class TestXgboostTraining(unittest.TestCase):
         print(secure_dataset_a.test_X.shape)
         print(secure_dataset_a.test_y.shape)
 
-        passive_components = Initializer(log_config_path='', config_path='')
+        passive_components = Initializer(log_config_path='', config_path='', plot_lock=plot_lock)
+        passive_components.stub = self._passive_stub
         passive_components.stub = self._passive_stub
         passive_components.config_data = {
             'JOB_TEMP_DIR': '/tmp/passive', 'AGENCY_ID': PASSIVE_PARTY}
@@ -141,7 +143,8 @@ class TestXgboostTraining(unittest.TestCase):
                 booster_a.load_model()
                 booster_a.predict()
                 test_praba = booster_a.get_test_praba()
-                task_info_a.algorithm_type = 'PPC_PREDICT'
+                task_info_a.algorithm_type = 'Predict'
+                task_info_a.sync_file_list = {}
                 Evaluation(task_info_a, secure_dataset_a,
                            test_praba=test_praba)
                 ResultFileHandling(task_info_a)
@@ -161,7 +164,8 @@ class TestXgboostTraining(unittest.TestCase):
                 booster_b.load_model()
                 booster_b.predict()
                 test_praba = booster_b.get_test_praba()
-                task_info_b.algorithm_type = 'PPC_PREDICT'
+                task_info_b.algorithm_type = 'Predict'
+                task_info_b.sync_file_list = {}
                 Evaluation(task_info_b, secure_dataset_b,
                            test_praba=test_praba)
                 ResultFileHandling(task_info_b)
