@@ -41,11 +41,9 @@ endif()
 ##### the full-dependencies end #####
 
 ##### the sdk-dependencies #####
-if(BUILD_SDK)
-    # find JNI
-    set(JAVA_AWT_LIBRARY NotNeeded)
-    set(JAVA_JVM_LIBRARY NotNeeded)
-    find_package(JNI REQUIRED)
-    include_directories(${JNI_INCLUDE_DIRS})
-endif()
+# find JNI
+set(JAVA_AWT_LIBRARY NotNeeded)
+set(JAVA_JVM_LIBRARY NotNeeded)
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
 ##### the sdk-dependencies end#####

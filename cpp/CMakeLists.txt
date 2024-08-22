@@ -96,5 +96,5 @@ endif ()
 # for code coverage
 if (COVERAGE)
     include(Coverage)
-    config_coverage("coverage" "'/usr*' 'boost/*'")
+    config_coverage("coverage" "")
 endif ()
