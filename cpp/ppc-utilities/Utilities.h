@@ -20,20 +20,22 @@
 #pragma once
 
 #include "ppc-framework/Common.h"
+#include <boost/asio/detail/socket_ops.hpp>
 
 namespace ppc
 {
 inline uint64_t decodeNetworkBuffer(
     bcos::bytes& _result, bcos::byte const* buffer, unsigned int bufferLen, uint64_t const offset)
 {
-    CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, bufferLen);
+    uint64_t curOffset = offset;
+    CHECK_OFFSET_WITH_THROW_EXCEPTION(curOffset, bufferLen);
     auto dataLen =
-        boost::asio::detail::socket_ops::network_to_host_short(*((uint16_t*)buffer + offset));
-    offset += 2;
-    CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, bufferLen);
-    buffer.insert(
-        buffer.end(), (bcos::byte*)_buffer + offset, (bcos::byte*)_buffer + offset + dataLen);
-    offset += dataLen;
-    return offset;
+        boost::asio::detail::socket_ops::network_to_host_short(*((uint16_t*)buffer + curOffset));
+    curOffset += 2;
+    CHECK_OFFSET_WITH_THROW_EXCEPTION(curOffset, bufferLen);
+    _result.insert(
+        _result.end(), (bcos::byte*)buffer + curOffset, (bcos::byte*)buffer + curOffset + dataLen);
+    curOffset += dataLen;
+    return curOffset;
 }
 }  // namespace ppc

@@ -18,9 +18,12 @@
  * @date 2024-08-22
  */
 #pragma once
+#include "../Common.h"
 #include <bcos-boostssl/interfaces/MessageFace.h>
 #include <bcos-utilities/Common.h>
+#include <bcos-utilities/Log.h>
 #include <memory>
+#include <sstream>
 
 namespace ppc::protocol
 {
@@ -31,18 +34,24 @@ public:
     MessageOptionalHeader() = default;
     virtual ~MessageOptionalHeader() = default;
 
-    virtual bcos::bytes encode() const = 0;
+    virtual void encode(bcos::bytes& buffer) const = 0;
+    virtual int64_t decode(bcos::bytesConstRef data, uint64_t const _offset) = 0;
+
     // the componentType
     virtual uint8_t componentType() const { return m_componentType; }
+    virtual void setComponentType(uint8_t componentType) { m_componentType = componentType; }
+
     // the source nodeID that send the message
     virtual bcos::bytes const& srcNode() const { return m_srcNode; }
+    virtual void setSrcNode(bcos::bytes const& srcNode) { m_srcNode = srcNode; }
+
     // the target nodeID that should receive the message
     virtual bcos::bytes const& dstNode() const { return m_dstNode; }
+    virtual void setDstNode(bcos::bytes const& dstNode) { m_dstNode = dstNode; }
+
     // the target agency that need receive the message
     virtual bcos::bytes const& dstInst() const { return m_dstInst; }
-
-protected:
-    virtual uint32_t decode(bcos::bytesConstRef data) = 0;
+    virtual void setDstInst(bcos::bytes const& dstInst) { m_dstInst = dstInst; }
 
 protected:
     // the componentType
@@ -54,6 +63,7 @@ protected:
     // the target agency that need receive the message
     bcos::bytes m_dstInst;
 };
+
 class MessageHeader
 {
 public:
@@ -61,41 +71,51 @@ public:
     MessageHeader() = default;
     virtual ~MessageHeader() = default;
 
-    virtual bcos::bytes encode() const = 0;
+    virtual void encode(bcos::bytes& buffer) const = 0;
+    virtual int64_t decode(bcos::bytesConstRef data) = 0;
 
     // the msg version, used to support compatibility
     virtual uint8_t version() const { return m_version; }
+    virtual void setVersion(uint16_t version) { m_version = version; }
     // the traceID
     virtual std::string const& traceID() const { return m_traceID; }
+    virtual void setTraceID(std::string traceID) { m_traceID = traceID; }
+
     // the srcGwNode
-    virtual bcos::bytes const& srcGwNode() const { return m_srcGwNode; }
+    virtual std::string const& srcGwNode() const { return m_srcGwNode; }
+    virtual void setSrcGwNode(std::string const& srcGwNode) { m_srcGwNode = srcGwNode; }
+
     // the dstGwNode
-    virtual bcos::bytes const& dstGwNode() const { return m_dstGwNode; }
+    virtual std::string const& dstGwNode() const { return m_dstGwNode; }
+    virtual void setDstGwNode(std::string const& dstGwNode) { m_dstGwNode = dstGwNode; }
+
     // the packetType
     virtual uint16_t packetType() const { return m_packetType; }
+    virtual void setPacketType(uint16_t packetType) { m_packetType = packetType; }
     // the ttl
     virtual int16_t ttl() const { return m_ttl; }
+    virtual void setTTL(uint16_t ttl) { m_ttl = ttl; }
+
     // the ext(contains the router policy and response flag)
     virtual uint16_t ext() const { return m_ext; }
-    //// the optional field(used to route between components and nodes)
-    virtual MessageOptionalHeader::Ptr optionalFields() const { return m_optionalFields; }
-
-    virtual uint32_t length() const { return m_length; }
-
-    virtual void setVersion(uint16_t version) { m_version = version; }
-    virtual void setPacketType(uint16_t packetType) { m_packetType = packetType; }
-    // the seq is the traceID
-    virtual void setTraceID(std::string traceID) { m_traceID = traceID; }
     virtual void setExt(uint16_t ext) { m_ext = ext; }
+    //// the optional field(used to route between components and nodes)
+    virtual MessageOptionalHeader::Ptr optionalField() const { return m_optionalField; }
+    void setOptionalField(MessageOptionalHeader::Ptr optionalField)
+    {
+        m_optionalField = std::move(optionalField);
+    }
 
-    uint64_t packetLen() const { return m_packetLen; }
-    uint16_t headerLen() const { return m_headerLen; }
+    virtual uint16_t length() const { return m_length; }
 
     virtual bool isRespPacket() const = 0;
     virtual void setRespPacket() = 0;
 
-protected:
-    virtual uint32_t decode(bcos::bytesConstRef data) = 0;
+
+    // Note: only for log
+    std::string_view srcP2PNodeIDView() const { return printP2PIDElegantly(m_srcGwNode); }
+    // Note: only for log
+    std::string_view dstP2PNodeIDView() const { return printP2PIDElegantly(m_dstGwNode); }
 
 protected:
     // the msg version, used to support compatibility
@@ -103,9 +123,9 @@ protected:
     // the traceID
     std::string m_traceID;
     // the srcGwNode
-    bcos::bytes m_srcGwNode;
+    std::string m_srcGwNode;
     // the dstGwNode
-    bcos::bytes m_dstGwNode;
+    std::string m_dstGwNode;
     // the packetType
     uint16_t m_packetType;
     // the ttl
@@ -113,37 +133,8 @@ protected:
     // the ext(contains the router policy and response flag)
     uint16_t m_ext;
     //// the optional field(used to route between components and nodes)
-    MessageOptionalHeader::Ptr m_optionalFields;
-    uint64_t m_packetLen;
-    uint16_t m_headerLen;
-};
-
-class MessagePayload
-{
-public:
-    using Ptr = std::shared_ptr<MessagePayload>;
-    MessagePayload() = default;
-    virtual ~MessagePayload() = default;
-
-    virtual bcos::bytes encode() const = 0;
-
-    // the version
-    virtual uint8_t version() const { return m_version; }
-    // the topic
-    virtual std::string const& topic() const { return m_topic; }
-    virtual bcos::bytes const& data() const { return m_data; }
-    virtual uint32_t length() const { return m_length; }
-
-protected:
-    virtual uint32_t decode(uint32_t startPos, bcos::bytesConstRef data) = 0;
-
-protected:
-    // the front payload version, used to support compatibility
-    uint8_t m_version;
-    // the topic
-    std::string m_topic;
-    bcos::bytes m_data;
-    uint32_t m_length;
+    MessageOptionalHeader::Ptr m_optionalField;
+    uint16_t mutable m_length;
 };
 
 class Message : virtual public bcos::boostssl::MessageFace
@@ -154,34 +145,46 @@ public:
     ~Message() override {}
 
     virtual MessageHeader::Ptr header() const { return m_header; }
-    virtual MessagePayLoad::Ptr payload() const { return m_payload; }
+    virtual void setHeader(MessageHeader::Ptr header) { m_header = std::move(header); }
 
+    /// the overloaed implementation ===
     uint16_t version() const override { return m_header->version(); }
-    void setVersion(uint16_t version) override{m_header->setVersion(version)} uint16_t
-        packetType() const override
-    {
-        return m_header->packetType();
-    }
+    void setVersion(uint16_t version) override { m_header->setVersion(version); }
+    uint16_t packetType() const override { return m_header->packetType(); }
     void setPacketType(uint16_t packetType) override { m_header->setPacketType(packetType); }
     std::string const& seq() const override { return m_header->traceID(); }
     void setSeq(std::string traceID) override { m_header->setTraceID(traceID); }
     uint16_t ext() const override { return m_header->ext(); }
-    void setExt(uint16_t ext) override { m_header->setExt(except); }
+    void setExt(uint16_t ext) override { m_header->setExt(ext); }
 
     bool isRespPacket() const override { return m_header->isRespPacket(); }
     void setRespPacket() override { m_header->setRespPacket(); }
 
-    virtual uint32_t length() const override { return m_header->packetLen(); }
+    virtual uint32_t length() const override
+    {
+        return m_header->length() + (m_payload ? m_payload->size() : 0);
+    }
+
     std::shared_ptr<bcos::bytes> payload() const override { return m_payload; }
     void setPayload(std::shared_ptr<bcos::bytes> _payload) override
     {
         m_payload = std::move(_payload);
     }
 
-
 protected:
     MessageHeader::Ptr m_header;
     std::shared_ptr<bcos::bytes> m_payload;
+};
+
+class MessageHeaderBuilder
+{
+public:
+    using Ptr = std::shared_ptr<MessageHeaderBuilder>;
+    MessageHeaderBuilder() = default;
+    virtual ~MessageHeaderBuilder() = default;
+
+    virtual MessageHeader::Ptr build(bcos::bytesConstRef _data) = 0;
+    virtual MessageHeader::Ptr build() = 0;
 };
 
 class MessageBuilder
@@ -191,5 +194,28 @@ public:
     virtual ~MessageBuilder() = default;
 
     virtual Message::Ptr build() = 0;
+    virtual Message::Ptr build(bcos::bytesConstRef buffer) = 0;
+};
+
+inline std::string printMessage(Message::Ptr const& _msg)
+{
+    std::ostringstream stringstream;
+    stringstream << LOG_KV("from", _msg->header()->srcP2PNodeIDView())
+                 << LOG_KV("to", _msg->header()->dstP2PNodeIDView())
+                 << LOG_KV("ttl", _msg->header()->ttl())
+                 << LOG_KV("rsp", _msg->header()->isRespPacket())
+                 << LOG_KV("traceID", _msg->header()->traceID())
+                 << LOG_KV("packetType", _msg->header()->packetType())
+                 << LOG_KV("length", _msg->length());
+    return stringstream.str();
 }
+
+inline std::string printWsMessage(bcos::boostssl::MessageFace::Ptr const& _msg)
+{
+    std::ostringstream stringstream;
+    stringstream << LOG_KV("rsp", _msg->isRespPacket()) << LOG_KV("traceID", _msg->seq())
+                 << LOG_KV("packetType", _msg->packetType()) << LOG_KV("length", _msg->length());
+    return stringstream.str();
+}
+
 }  // namespace ppc::protocol

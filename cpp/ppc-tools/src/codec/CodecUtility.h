@@ -20,7 +20,6 @@
 #pragma once
 #include "openssl/bn.h"
 #include "ppc-framework/libwrapper/BigNum.h"
-#include "ppc-utilities/Utilities.h"
 #include <bcos-utilities/Common.h>
 #include <boost/endian/conversion.hpp>
 #include <cstring>
