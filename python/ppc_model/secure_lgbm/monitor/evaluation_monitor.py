@@ -7,7 +7,6 @@ from typing import Optional
 import matplotlib.pyplot as plt
 
 from ppc_common.ppc_utils.utils import METRICS_OVER_ITERATION_FILE
-from ppc_model.common.global_context import plot_lock
 from ppc_model.secure_lgbm.monitor.callback import TrainingCallback
 from ppc_model.secure_lgbm.monitor.core import _Model
 
@@ -110,8 +109,7 @@ class EvaluationMonitor(TrainingCallback):
         while retry_num < max_retry:
             retry_num += 1
             try:
-                with plot_lock:
-                    _draw_figure(model)
+                _draw_figure(model)
             except:
                 self.logger.info(f'scores = {model.get_history()}')
                 self.logger.info(f'path = {model.get_workspace()}')

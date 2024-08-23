@@ -12,7 +12,6 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve, auc
 
 from ppc_model.common.context import Context
-from ppc_model.common.global_context import plot_lock
 from ppc_model.datasets.dataset import SecureDataset
 from ppc_model.common.model_result import ResultFileHandling
 from ppc_model.secure_lgbm.monitor.feature.feature_evaluation_info import EvaluationType
@@ -156,7 +155,7 @@ class Evaluation:
             while retry_num < max_retry:
                 retry_num += 1
                 try:
-                    with plot_lock:
+                    with ctx.components.plot_lock:
                         ks_value, auc_value = Evaluation.plot_two_class_graph(
                             self, y_true, y_praba)
                 except:

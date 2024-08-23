@@ -139,7 +139,8 @@ class TestXgboostTraining(unittest.TestCase):
                 booster_a.load_model()
                 booster_a.predict()
                 test_praba = booster_a.get_test_praba()
-                task_info_a.algorithm_type = 'PPC_PREDICT'
+                task_info_a.algorithm_type = 'Predict'
+                task_info_a.sync_file_list = {}
                 Evaluation(task_info_a, secure_dataset_a,
                            test_praba=test_praba)
                 ResultFileHandling(task_info_a)
@@ -159,7 +160,8 @@ class TestXgboostTraining(unittest.TestCase):
                 booster_b.load_model()
                 booster_b.predict()
                 test_praba = booster_b.get_test_praba()
-                task_info_b.algorithm_type = 'PPC_PREDICT'
+                task_info_b.algorithm_type = 'Predict'
+                task_info_b.sync_file_list = {}
                 Evaluation(task_info_b, secure_dataset_b,
                            test_praba=test_praba)
                 ResultFileHandling(task_info_b)
