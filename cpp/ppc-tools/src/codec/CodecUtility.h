@@ -20,21 +20,10 @@
 #pragma once
 #include "openssl/bn.h"
 #include "ppc-framework/libwrapper/BigNum.h"
+#include "ppc-utilities/Utilities.h"
 #include <bcos-utilities/Common.h>
 #include <boost/endian/conversion.hpp>
 #include <cstring>
-
-#define CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, length)                                    \
-    do                                                                                       \
-    {                                                                                        \
-        if (offset > length)                                                                 \
-        {                                                                                    \
-            throw std::out_of_range("Out of range error, offset:" + std::to_string(offset) + \
-                                    " ,length: " + std::to_string(length) +                  \
-                                    " ,file: " + __FILE__ + " ,func: " + __func__ +          \
-                                    " ,line: " + std::to_string(__LINE__));                  \
-        }                                                                                    \
-    } while (0);
 namespace ppc
 {
 inline bcos::byte* encodeBuffer(

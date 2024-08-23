@@ -64,10 +64,7 @@ public:
     std::shared_ptr<bcos::bytes> data() const override { return m_data; }
     // Note: here directly use passed-in _data, make-sure _data not changed before send the message
     void setData(std::shared_ptr<bcos::bytes> _data) override { m_data = _data; }
-    std::map<std::string, std::string> header() override
-    {
-        return decodeMap(m_header);
-    }
+    std::map<std::string, std::string> header() override { return decodeMap(m_header); }
     void setHeader(std::map<std::string, std::string> _header) override
     {
         m_header = encodeMap(_header);

@@ -44,6 +44,18 @@ namespace ppc
     {                                  \
     }
 
+#define CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, length)                                    \
+    do                                                                                       \
+    {                                                                                        \
+        if (offset > length)                                                                 \
+        {                                                                                    \
+            throw std::out_of_range("Out of range error, offset:" + std::to_string(offset) + \
+                                    " ,length: " + std::to_string(length) +                  \
+                                    " ,file: " + __FILE__ + " ,func: " + __func__ +          \
+                                    " ,line: " + std::to_string(__LINE__));                  \
+        }                                                                                    \
+    } while (0);
+
 DERIVE_PPC_EXCEPTION(OpenFileFailed);
 DERIVE_PPC_EXCEPTION(DataSchemaNotSetted);
 DERIVE_PPC_EXCEPTION(UnsupportedDataSchema);

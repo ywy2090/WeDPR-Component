@@ -90,15 +90,12 @@ set(PPC_CRYPTO_C_SDK_STATIC_TARGET ppc-crypto-c-sdk-static)
 set(PPC_CRYPTO_C_SDK_TARGET ppc-crypto-c-sdk)
 
 set(PPC_FRONT_C_SDK_STATIC_TARGET ppc-front-c-sdk-static)
-set(PPC_FRONT_C_SDK_TARGET ppc-front-c-sdk)
 
 # add suffix for arm
 if(ARCH_NATIVE)
     message(STATUS "Building arm architecture, CMAKE_HOST_SYSTEM_PROCESSOR => ${CMAKE_HOST_SYSTEM_PROCESSOR}")
     set(PPC_CRYPTO_C_SDK_STATIC_TARGET "ppc-crypto-c-sdk-aarch64")
     set(PPC_CRYPTO_C_SDK_TARGET "ppc-crypto-c-sdk-static-aarch64")
-    set(PPC_FRONT_C_SDK_STATIC_TARGET ppc-front-c-sdk-static-aarch64)
-    set(PPC_FRONT_C_SDK_TARGET ppc-front-c-sdk-aarch64)
 endif()
 #====== wedpr-component-sdk ===========
 
@@ -128,3 +125,4 @@ set(BOOST_UNIT_TEST Boost::unit_test_framework)
 
 # ==== the swig wrapper ===== 
 set(WEDPR_PYTHON_TOOLKIT "wedpr_python_toolkit")
+set(WEDPR_PYTHON_TOOLKIT_DIR ${PROJECT_BINARY_DIR}/python/${WEDPR_PYTHON_TOOLKIT})

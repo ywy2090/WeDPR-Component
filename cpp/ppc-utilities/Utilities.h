@@ -13,44 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file wedpr_front_config.h
+ * @file Utilitiles.cpp
  * @author: yujiechen
- * @date 2024-08-22
+ * @date 2024-08-23
  */
+#pragma once
 
-#ifndef __WEDPR_FRONT_CONFIG_H__
-#define __WEDPR_FRONT_CONFIG_H__
-#include "ppc-framework/libwrapper/Buffer.h"
+#include "ppc-framework/Common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief the gateway endpoint information
- *
- */
-struct wedpr_gateway_endpoint
+namespace ppc
 {
-    InputBuffer const* host;
-    uint16_t port;
-};
-
-struct wedpr_gateway_info
+inline uint64_t decodeNetworkBuffer(
+    bcos::bytes& _result, bcos::byte const* buffer, unsigned int bufferLen, uint64_t const offset)
 {
-    struct wedpr_gateway_endpoint* gatewayEndpoints;
-    uint16_t gatewayCount;
-};
-
-struct wedpr_front_config
-{
-    int threadPoolSize;
-    // the agency id
-    InputBuffer const* agencyID;
-    // the gateway-endpoints
-    struct wedpr_gateway_info* gateway_info;
-};
-#ifdef __cplusplus
+    CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, bufferLen);
+    auto dataLen =
+        boost::asio::detail::socket_ops::network_to_host_short(*((uint16_t*)buffer + offset));
+    offset += 2;
+    CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, bufferLen);
+    buffer.insert(
+        buffer.end(), (bcos::byte*)_buffer + offset, (bcos::byte*)_buffer + offset + dataLen);
+    offset += dataLen;
+    return offset;
 }
-#endif
-#endif
+}  // namespace ppc
