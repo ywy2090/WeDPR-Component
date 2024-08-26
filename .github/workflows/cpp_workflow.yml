@@ -141,12 +141,12 @@ jobs:
         if: runner.os == 'macos'
         with:
           name: libppc-crypto-sdk-jni.dylib
-          path: ./cpp/ppc-crypto-c-sdk/bindings/java/src/main/resources/META-INF/native/libppc-crypto-sdk-jni.dylib
+          path: ./cpp/wedpr-component-sdk/bindings/java/src/main/resources/META-INF/native/libppc-crypto-sdk-jni.dylib
       - uses: actions/upload-artifact@v2
         if: runner.os == 'Windows'
         with:
           name: libppc-crypto-sdk-jni.dylib
-          path: D:\a\WeDPR-Component\cpp\ppc-crypto-c-sdk\bindings\java\src\main\resources\META-INF\native\Release\ppc-crypto-sdk-jni.dll
+          path: D:\a\WeDPR-Component\cpp\wedpr-component-sdk\bindings\java\src\main\resources\META-INF\native\Release\ppc-crypto-sdk-jni.dll
 
   build_centos:
     name: build_centos full node
@@ -221,4 +221,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: libppc-crypto-sdk-jni.so
-          path: ./cpp/ppc-crypto-c-sdk/bindings/java/src/main/resources/META-INF/native/libppc-crypto-sdk-jni.so
+          path: ./cpp/wedpr-component-sdk/bindings/java/src/main/resources/META-INF/native/libppc-crypto-sdk-jni.so

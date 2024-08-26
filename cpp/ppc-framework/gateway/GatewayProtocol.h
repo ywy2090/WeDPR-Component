@@ -1,5 +1,5 @@
-/*
- *  Copyright (C) 2022 WeDPR.
+/**
+ *  Copyright (C) 2023 WeDPR.
  *  SPDX-License-Identifier: Apache-2.0
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,28 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file Common.h
- * @author: shawnhe
- * @date 2022-10-25
+ * @file Message.h
+ * @author: yujiechen
+ * @date 2024-08-22
  */
-
 #pragma once
+#include <stdint.h>
 
-#include "ppc-framework/Common.h"
-#include <bcos-utilities/BoostLog.h>
-#include <bcos-utilities/Common.h>
-#include <bcos-utilities/Error.h>
-#include <bcos-utilities/IOServicePool.h>
-#include <bcos-utilities/ThreadPool.h>
-#include <json/json.h>
-#include <boost/algorithm/string/split.hpp>
-#include <functional>
-
-namespace ppc::front
+namespace ppc::gateway
 {
-#define FRONT_LOG(LEVEL) BCOS_LOG(LEVEL) << "[FRONT]"
+enum class GatewayPacketType : uint16_t
+{
+    P2PMessage = 0x00,
+    RouterTableSyncSeq = 0x10,
+    RouterTableResponse = 0x11,
+    RouterTableRequest = 0x12
+};
 
-#define HOLDING_MESSAGE_TIMEOUT_M 30
-#define CHANNEL_THREAD_POOL_MODULE "t_channel_manager"
-
-}  // namespace ppc::front
+enum class GatewayMsgExtFlag : uint16_t
+{
+    Response = 0x1,
+};
+}  // namespace ppc::gateway

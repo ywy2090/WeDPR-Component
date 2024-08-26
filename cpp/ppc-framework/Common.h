@@ -44,12 +44,39 @@ namespace ppc
     {                                  \
     }
 
+#define CHECK_OFFSET_WITH_THROW_EXCEPTION(offset, length)                                    \
+    do                                                                                       \
+    {                                                                                        \
+        if (offset > length)                                                                 \
+        {                                                                                    \
+            throw std::out_of_range("Out of range error, offset:" + std::to_string(offset) + \
+                                    " ,length: " + std::to_string(length) +                  \
+                                    " ,file: " + __FILE__ + " ,func: " + __func__ +          \
+                                    " ,line: " + std::to_string(__LINE__));                  \
+        }                                                                                    \
+    } while (0);
+
 DERIVE_PPC_EXCEPTION(OpenFileFailed);
 DERIVE_PPC_EXCEPTION(DataSchemaNotSetted);
 DERIVE_PPC_EXCEPTION(UnsupportedDataSchema);
+DERIVE_PPC_EXCEPTION(WeDPRException);
 
 constexpr static int MAX_PORT = 65535;
 constexpr static int DEFAULT_SECURITY_PARAM = 128;
+
+constexpr static size_t RSA_PUBLIC_KEY_PREFIX = 18;
+constexpr static size_t RSA_PUBLIC_KEY_TRUNC = 8;
+constexpr static size_t RSA_PUBLIC_KEY_TRUNC_LENGTH = 26;
+
+inline std::string_view printP2PIDElegantly(std::string_view p2pId) noexcept
+{
+    if (p2pId.length() < RSA_PUBLIC_KEY_TRUNC_LENGTH)
+    {
+        return p2pId;
+    }
+    return p2pId.substr(RSA_PUBLIC_KEY_PREFIX, RSA_PUBLIC_KEY_TRUNC);
+}
+
 
 #if ENABLE_CPU_FEATURES
 #if X86

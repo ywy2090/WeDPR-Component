@@ -63,8 +63,8 @@ include(TargetSettings)
 include(Dependencies)
 
 ########### set the sources ########### 
-set(JNI_SOURCE_PATH ppc-crypto-c-sdk/bindings/java/src/main/c)
-set(SDK_SOURCE_LIST ppc-homo ppc-crypto-core ppc-crypto-c-sdk ${JNI_SOURCE_PATH})
+set(JNI_SOURCE_PATH wedpr-component-sdk/bindings/java/src/main/c)
+set(SDK_SOURCE_LIST ppc-homo ppc-crypto-core wedpr-component-sdk ${JNI_SOURCE_PATH})
 # Note: the udf depends on mysql, not enabled in the full node mode
 set(UDF_SOURCE_LIST ${SDK_SOURCE_LIST} ppc-udf)
 set(ALL_SOURCE_LIST 
@@ -77,6 +77,19 @@ set(ALL_SOURCE_LIST
 set(CEM_SOURCE "")
 if(BUILD_CEM)
     set(CEM_SOURCE "ppc-cem")
+endif()
+
+if(BUILD_WEDPR_TOOLKIT)
+    # fetch the python dependencies
+    option(FETCH_PYTHON_DEPS "Install python required modules if not available" ON)
+    message(STATUS "Python fetch dependencies: ${FETCH_PYTHON_DEPS}")
+    include(python)
+    if(WIN32)
+        message(STATUS "Getting SWIG for Windows: ...")
+        include(swig)
+        message(STATUS "Getting SWIG for Windows: ...DONE")
+    endif()
+    add_subdirectory(wedpr-toolkit-wrapper)
 endif()
 
 if(BUILD_ALL)
