@@ -35,7 +35,6 @@ public class PirController {
                     objectMapper.writeValueAsString(serverJobRequest));
             // 1. 根据请求，筛选数据，加密密钥，返回筛选结果及AES消息密文
             ServerOTResponse serverOTResponse = pirAppService.providerOtCipher(serverJobRequest);
-            pirAppService.reportToAdm();
             return new ClientJobResponse(WedprStatusEnum.SUCCESS, serverOTResponse);
         } catch (Exception e) {
             logger.warn(
@@ -45,10 +44,4 @@ public class PirController {
             return new ClientJobResponse(WedprStatusEnum.SYSTEM_EXCEPTION, e.getMessage());
         }
     }
-
-    //    @PostMapping(Constant.PIR_API_PREFIX + "/client")
-    //    public ClientJobResponse pirClientController(@RequestBody ClientJobRequest
-    // clientJobRequest) {
-    //
-    //    }
 }

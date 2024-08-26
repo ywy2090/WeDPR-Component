@@ -1,7 +1,5 @@
 package com.wedpr.pir.sdk.service;
 
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
 import com.wedpr.pir.sdk.entity.body.PirResultBody;
 import com.wedpr.pir.sdk.entity.body.ServerResultBody;
 import com.wedpr.pir.sdk.entity.request.ClientDecryptRequest;
@@ -21,7 +19,6 @@ import java.util.List;
  * @date 2024/8/21
  */
 public class ClientDecryptService {
-    private static final Logger logger = LoggerFactory.getLogger(ClientDecryptService.class);
     private void decryptServerResultList(
             PirResultBody pirResultBody, List<ServerResultBody> serverResultList, BigInteger b) {
         for (ServerResultBody body : serverResultList) {
@@ -43,7 +40,6 @@ public class ClientDecryptService {
     }
 
     protected ClientDecryptResponse runDecryptOTparam(ClientDecryptRequest clientDecryptRequest) {
-        logger.debug("runDecryptOTparam Start: ", clientDecryptRequest);
         List<PirResultBody> pirResultBodyArrayList = new ArrayList<>();
         for (int i = 0;
                 i < clientDecryptRequest.getServerResult().getResultBodyList().size();
@@ -61,7 +57,6 @@ public class ClientDecryptService {
                     BasicTypeHelper.isStringNotEmpty(pirResultBody.getSearchValue()));
             pirResultBodyArrayList.add(pirResultBody);
         }
-        logger.debug("runDecryptOTparam Success: ", pirResultBodyArrayList);
         ClientDecryptResponse clientDecryptResponse = new ClientDecryptResponse();
         clientDecryptResponse.setDetail(pirResultBodyArrayList);
         return clientDecryptResponse;

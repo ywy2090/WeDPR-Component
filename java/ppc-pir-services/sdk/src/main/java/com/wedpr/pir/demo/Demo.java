@@ -26,7 +26,7 @@ public class Demo {
         pirJobParam.setDatasetId("t_login_token");
         pirJobParam.setJobCreator("1001");
         pirJobParam.setGatewayUrl("http://localhost:5831/api/pir/v3/server");
-        pirJobParam.setSearchIdList(Arrays.asList(new String[] {"1", "20", "3", "456"}));
+        pirJobParam.setSearchIdList(Arrays.asList("1", "20", "3", "456"));
 
         PirClient pirClient = new PirClient(pirJobParam);
         PirResultResponse pirResultResponse = pirClient.executePirJob();
@@ -42,7 +42,7 @@ public class Demo {
         pirJobParam.setDatasetId("t_login_token");
         pirJobParam.setJobCreator("1001");
         pirJobParam.setGatewayUrl("http://localhost:5831/api/pir/v3/server");
-        pirJobParam.setSearchIdList(Arrays.asList(new String[] {"1", "20", "3", "456"}));
+        pirJobParam.setSearchIdList(Arrays.asList("1", "20", "3", "456"));
 
         PirClient pirClient = new PirClient(pirJobParam);
         PirResultResponse pirResultResponse = pirClient.executePirJob();

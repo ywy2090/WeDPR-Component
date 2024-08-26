@@ -1,8 +1,5 @@
 package com.wedpr.pir.sdk.service;
 
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
-import com.wedpr.pir.sdk.crypto.IdHashVec;
 import com.wedpr.pir.sdk.entity.body.PirDataBody;
 import com.wedpr.pir.sdk.entity.request.ClientOTRequest;
 import com.wedpr.pir.sdk.entity.response.ClientOTResponse;
@@ -20,12 +17,10 @@ import java.util.Random;
  * @date 2024/8/20
  */
 public class ClientOTService {
-    private static final Logger logger = LoggerFactory.getLogger(ClientOTService.class);
     private final Random rand = new Random();
 
     /* hash披露, 请求方选择id，生成随机数a、b */
     protected ClientOTResponse runClientOTParam(ClientOTRequest clientOTRequest) {
-        logger.debug("runClientOTParam start: ", clientOTRequest);
         int filterLength = clientOTRequest.getFilterLength();
         BigInteger blindingA = CryptoOperatorHelper.getRandomInt();
         BigInteger blindingB = CryptoOperatorHelper.getRandomInt();
@@ -46,15 +41,12 @@ public class ClientOTService {
             pirDataBody.setZ0(z0);
             pirDataArrayList.add(pirDataBody);
         }
-        logger.debug("runClientOTParam success: ", pirDataArrayList);
         return new ClientOTResponse(blindingB, x, y, pirDataArrayList);
     }
 
     /* hash筛选, 请求方选择顺序\delta\in \{0,1,..,m-1\}，生成随机数a、b */
     protected ClientOTResponse runClientOTCipher(ClientOTRequest clientOTRequest)
             throws WedprException {
-        logger.debug("runClientOTCipher start: ", clientOTRequest);
-
         int obfuscationOrder = clientOTRequest.getObfuscationOrder();
         BigInteger blindingA = CryptoOperatorHelper.getRandomInt();
         BigInteger blindingB = CryptoOperatorHelper.getRandomInt();
@@ -68,7 +60,7 @@ public class ClientOTService {
             int idIndex = rand.nextInt(obfuscationOrder + 1);
             BigInteger z0 = calculateIndexZ0(idIndex, blindingC);
             List<String> idHashVecList =
-                    IdHashVec.getIdHashVec(obfuscationOrder, idIndex, searchId);
+                    CryptoOperatorHelper.getIdHashVec(obfuscationOrder, idIndex, searchId);
 
             PirDataBody pirDataBody = new PirDataBody();
             pirDataBody.setZ0(z0);
@@ -76,7 +68,6 @@ public class ClientOTService {
             pirDataBody.setIdHashList(idHashVecList);
             pirDataArrayList.add(pirDataBody);
         }
-        logger.debug("runClientOTCipher success: ", pirDataArrayList);
         return new ClientOTResponse(blindingB, x, y, pirDataArrayList);
     }
 

@@ -31,8 +31,7 @@ public class AESHelper {
     public static String encrypt(String plainText, String keyString) throws WedprException {
         try {
             byte[] iv = new byte[12];
-            SecureRandom secureRandom = new SecureRandom();
-            secureRandom.nextBytes(iv);
+            SECURE_RANDOM.nextBytes(iv);
             byte[] contentBytes = plainText.getBytes(StandardCharsets.UTF_8);
             Cipher cipher = Cipher.getInstance(AES_ALGORITHM_TRANSFORMATION);
             GCMParameterSpec params = new GCMParameterSpec(128, iv);

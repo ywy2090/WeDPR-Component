@@ -43,8 +43,4 @@ public class PirAppService {
         }
         return otResultResponse;
     }
-
-    public void reportToAdm() {
-        // TODO: 任务结束上报
-    }
 }
