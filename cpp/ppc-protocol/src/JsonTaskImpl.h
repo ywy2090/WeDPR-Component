@@ -30,14 +30,19 @@ class JsonTaskImpl : public Task
 {
 public:
     using Ptr = std::shared_ptr<JsonTaskImpl>;
-    JsonTaskImpl(std::string const& _selfPartyID, std::string const& _prePath = "data") : m_selfPartyID(_selfPartyID), m_prePath(_prePath)
+    JsonTaskImpl(std::string const& _selfPartyID, std::string const& _prePath = "data")
+      : m_selfPartyID(_selfPartyID), m_prePath(_prePath)
     {}
-    JsonTaskImpl(std::string const& _selfPartyID, std::string_view _taskData, std::string const& _prePath = "data") : JsonTaskImpl(_selfPartyID, _prePath)
+    JsonTaskImpl(std::string const& _selfPartyID, std::string_view _taskData,
+        std::string const& _prePath = "data")
+      : JsonTaskImpl(_selfPartyID, _prePath)
     {
         decode(_taskData);
     }
 
-    JsonTaskImpl(std::string const& _selfPartyID, Json::Value const& _taskJson, std::string const& _prePath = "data") : JsonTaskImpl(_selfPartyID, _prePath)
+    JsonTaskImpl(std::string const& _selfPartyID, Json::Value const& _taskJson,
+        std::string const& _prePath = "data")
+      : JsonTaskImpl(_selfPartyID, _prePath)
     {
         decodeJsonValue(_taskJson);
     }
@@ -64,10 +69,7 @@ public:
         return m_peerParties;
     }
 
-    std::vector<std::string> const& getReceiverLists() const override
-    {
-        return m_receiverLists;
-    }
+    std::vector<std::string> const& getReceiverLists() const override { return m_receiverLists; }
 
     // params of the task, can be deserialized using json
     std::string const& param() const override { return m_param; }
@@ -89,11 +91,8 @@ public:
     {
         m_syncResultToPeer = _syncResultToPeer;
     }
-    void setLowBandwidth(bool _lowBandwidth) override
-    {
-        m_lowBandwidth = _lowBandwidth;
-    }
-    
+    void setLowBandwidth(bool _lowBandwidth) override { m_lowBandwidth = _lowBandwidth; }
+
     // decode the task
     void decode(std::string_view _taskData) override;
     virtual void decodeJsonValue(Json::Value const& root);

@@ -7,7 +7,6 @@ import networkx as nx
 from networkx.drawing.nx_pydot import graphviz_layout
 
 from ppc_model.common.model_result import ResultFileHandling
-from ppc_model.common.global_context import plot_lock
 from ppc_model.secure_lgbm.vertical.booster import VerticalBooster
 
 
@@ -50,7 +49,7 @@ class ModelPlot:
                 while retry_num < max_retry:
                     retry_num += 1
                     try:
-                        with plot_lock:
+                        with self.ctx.components.plot_lock:
                             self._G.tree_plot(
                                 figsize=(10, 5), save_filename=tree_file_path)
                     except:

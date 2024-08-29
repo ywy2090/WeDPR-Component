@@ -20,13 +20,13 @@ class ResultFileHandling:
         if ctx.algorithm_type == AlgorithmType.Train.name:
             self._process_fe_result()
 
-        # remove job workspace
-        # self._remove_workspace()
-
         # Synchronization result file
         if (len(ctx.result_receiver_id_list) == 1 and ctx.participant_id_list[0] != ctx.result_receiver_id_list[0]) \
                 or len(ctx.result_receiver_id_list) > 1:
             self._sync_result_files()
+
+        # remove job workspace
+        self._remove_workspace()
 
     def _process_fe_result(self):
         if os.path.exists(self.ctx.preprocessing_result_file):
@@ -134,33 +134,8 @@ class ResultFileHandling:
                 f'job {self.ctx.job_id}: {self.ctx.workspace} does not exist.')
 
     def _sync_result_files(self):
-        if self.ctx.algorithm_type == AlgorithmType.Train.name:
-            self.sync_result_file(self.ctx, self.ctx.metrics_iteration_file,
-                                  self.ctx.remote_metrics_iteration_file, 'f1')
-            self.sync_result_file(self.ctx, self.ctx.feature_importance_file,
-                                  self.ctx.remote_feature_importance_file, 'f2')
-            self.sync_result_file(self.ctx, self.ctx.summary_evaluation_file,
-                                  self.ctx.remote_summary_evaluation_file, 'f3')
-            self.sync_result_file(self.ctx, self.ctx.train_metric_ks_table,
-                                  self.ctx.remote_train_metric_ks_table, 'f4')
-            self.sync_result_file(self.ctx, self.ctx.train_metric_roc_file,
-                                  self.ctx.remote_train_metric_roc_file, 'f5')
-            self.sync_result_file(self.ctx, self.ctx.train_metric_ks_file,
-                                  self.ctx.remote_train_metric_ks_file, 'f6')
-            self.sync_result_file(self.ctx, self.ctx.train_metric_pr_file,
-                                  self.ctx.remote_train_metric_pr_file, 'f7')
-            self.sync_result_file(self.ctx, self.ctx.train_metric_acc_file,
-                                  self.ctx.remote_train_metric_acc_file, 'f8')
-            self.sync_result_file(self.ctx, self.ctx.test_metric_ks_table,
-                                  self.ctx.remote_test_metric_ks_table, 'f9')
-            self.sync_result_file(self.ctx, self.ctx.test_metric_roc_file,
-                                  self.ctx.remote_test_metric_roc_file, 'f10')
-            self.sync_result_file(self.ctx, self.ctx.test_metric_ks_file,
-                                  self.ctx.remote_test_metric_ks_file, 'f11')
-            self.sync_result_file(self.ctx, self.ctx.test_metric_pr_file,
-                                  self.ctx.remote_test_metric_pr_file, 'f12')
-            self.sync_result_file(self.ctx, self.ctx.test_metric_acc_file,
-                                  self.ctx.remote_test_metric_acc_file, 'f13')
+        for key, value in self.ctx.sync_file_list.items():
+            self.sync_result_file(self.ctx, value[0], value[1], key)
 
     @staticmethod
     def sync_result_file(ctx, local_file, remote_file, key_file):

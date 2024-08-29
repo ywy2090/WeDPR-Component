@@ -32,7 +32,6 @@
 
 namespace ppc::front
 {
-
 #define FRONT_LOG(LEVEL) BCOS_LOG(LEVEL) << "[FRONT]"
 
 #define HOLDING_MESSAGE_TIMEOUT_M 30

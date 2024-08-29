@@ -475,7 +475,8 @@ class VerticalLGBMActiveParty(VerticalBooster):
                 remote_file_path=self.ctx.remote_feature_importance_file, storage_client=self.storage_client)
 
             if self.callback_container:
-                self.callback_container.after_training(self.model)
+                with self.ctx.components.plot_lock:
+                    self.callback_container.after_training(self.model)
 
             for partner_index in range(1, len(self.ctx.participant_id_list)):
                 if self.ctx.participant_id_list[partner_index] in self.ctx.result_receiver_id_list:

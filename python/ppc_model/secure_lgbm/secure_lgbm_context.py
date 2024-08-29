@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Any, Dict
 from sklearn.base import BaseEstimator
 
+from ppc_common.ppc_utils.utils import AlgorithmType
 from ppc_common.ppc_crypto.phe_factory import PheCipherFactory
 from ppc_model.common.context import Context
 from ppc_model.common.initializer import Initializer
@@ -231,6 +232,10 @@ class SecureLGBMContext(Context):
         self.lgbm_params.min_split_gain = model_setting.gamma
         self.lgbm_params.random_state = model_setting.seed
 
+        self.sync_file_list = {}
+        if self.algorithm_type == AlgorithmType.Train.name:
+            self.set_sync_file()
+
     def set_lgbm_params(self, model_setting: ModelSetting):
         """设置lgbm参数"""
         self.lgbm_params.set_model_setting(model_setting)
@@ -239,6 +244,20 @@ class SecureLGBMContext(Context):
         """获取lgbm参数"""
         return self.lgbm_params
 
+    def set_sync_file(self):
+        self.sync_file_list['metrics_iteration'] = [self.metrics_iteration_file, self.remote_metrics_iteration_file]
+        self.sync_file_list['feature_importance'] = [self.feature_importance_file, self.remote_feature_importance_file]
+        self.sync_file_list['summary_evaluation'] = [self.summary_evaluation_file, self.remote_summary_evaluation_file]
+        self.sync_file_list['train_ks_table'] = [self.train_metric_ks_table, self.remote_train_metric_ks_table]
+        self.sync_file_list['train_metric_roc'] = [self.train_metric_roc_file, self.remote_train_metric_roc_file]
+        self.sync_file_list['train_metric_ks'] = [self.train_metric_ks_file, self.remote_train_metric_ks_file]
+        self.sync_file_list['train_metric_pr'] = [self.train_metric_pr_file, self.remote_train_metric_pr_file]
+        self.sync_file_list['train_metric_acc'] = [self.train_metric_acc_file, self.remote_train_metric_acc_file]
+        self.sync_file_list['test_ks_table'] = [self.test_metric_ks_table, self.remote_test_metric_ks_table]
+        self.sync_file_list['test_metric_roc'] = [self.test_metric_roc_file, self.remote_test_metric_roc_file]
+        self.sync_file_list['test_metric_ks'] = [self.test_metric_ks_file, self.remote_test_metric_ks_file]
+        self.sync_file_list['test_metric_pr'] = [self.test_metric_pr_file, self.remote_test_metric_pr_file]
+        self.sync_file_list['test_metric_acc'] = [self.test_metric_acc_file, self.remote_test_metric_acc_file]
 
 class LGBMMessage(Enum):
     FEATURE_NAME = "FEATURE_NAME"
