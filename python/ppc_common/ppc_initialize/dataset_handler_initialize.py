@@ -10,7 +10,7 @@ class DataSetHandlerInitialize:
     def __init__(self, config, logger):
         self._config = config
         self._logger = logger
-        self._init_sql_storage()
+        # self._init_sql_storage()
         self._init_remote_storage()
         self._init_dataset_factory()
 

@@ -1,11 +1,9 @@
 import logging
 import logging.config
-import os
 
 import yaml
 
 from ppc_common.deps_services import storage_loader
-from ppc_common.deps_services.storage_api import StorageType
 from ppc_common.ppc_async_executor.thread_event_manager import ThreadEventManager
 from ppc_common.ppc_utils import common_func
 from ppc_model.network.grpc.grpc_client import GrpcClient
