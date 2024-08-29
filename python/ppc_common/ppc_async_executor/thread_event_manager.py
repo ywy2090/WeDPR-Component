@@ -10,25 +10,25 @@ class ThreadEventManager:
         self.events: Dict[str, threading.Event] = {}
         self.rw_lock = rwlock.RWLockWrite()
 
-    def add_event(self, task_id: str, event: threading.Event) -> None:
+    def add_event(self, target_id: str, event: threading.Event) -> None:
         with self.rw_lock.gen_wlock():
-            self.events[task_id] = event
+            self.events[target_id] = event
 
-    def remove_event(self, task_id: str):
+    def remove_event(self, target_id: str):
         with self.rw_lock.gen_wlock():
-            if task_id in self.events:
-                del self.events[task_id]
+            if target_id in self.events:
+                del self.events[target_id]
 
-    def set_event(self, task_id: str):
+    def set_event(self, target_id: str):
         with self.rw_lock.gen_wlock():
-            if task_id in self.events:
-                self.events[task_id].set()
+            if target_id in self.events:
+                self.events[target_id].set()
             else:
-                raise KeyError(f"Task ID {task_id} not found")
+                raise KeyError(f"Target id {target_id} not found")
 
-    def event_status(self, task_id: str) -> bool:
+    def event_status(self, target_id: str) -> bool:
         with self.rw_lock.gen_rlock():
-            if task_id in self.events:
-                return self.events[task_id].is_set()
+            if target_id in self.events:
+                return self.events[target_id].is_set()
             else:
                 return False

@@ -24,9 +24,8 @@ promise~=2.3
 # protobuf>=4.21.6,<5.0dev
 protobuf>=5.27.1
 pycryptodome==3.9.9
-PyJWT==2.4.0
-PyYAML==5.4.1
-# sha3==0.2.1
+pyjwt
+pyyaml
 mysqlclient==2.1.0
 waitress==2.1.2
 sqlparse~=0.4.1
@@ -38,7 +37,7 @@ google~=3.0.0
 paste~=3.5.0
 func_timeout==4.3.0
 cheroot==8.5.2
-prefect==0.14.15
+prefect==1.4.0
 gmssl~=3.2.1
 readerwriterlock~=1.0.4
 jsoncomment~=0.2.3
@@ -54,12 +53,11 @@ networkx
 pydot
 snowland-smx
 numpy==1.23.1
-graphviz~=0.20.1
+graphviz
 grpcio==1.62.1
 grpcio-tools==1.62.1
 xlrd~=1.0.0
 MarkupSafe>=2.1.1
-Werkzeug==2.3.8
 urllib3==1.26.18
 phe
 chardet

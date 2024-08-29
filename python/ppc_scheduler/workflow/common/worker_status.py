@@ -1,0 +1,7 @@
+class WorkerStatus:
+    PENDING = 'PENDING'
+    RUNNING = 'RUNNING'
+    SUCCESS = 'SUCCESS'
+    FAILURE = 'FAILURE'
+    TIMEOUT = 'TIMEOUT'
+    KILLED = 'KILLED'

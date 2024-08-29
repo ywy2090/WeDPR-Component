@@ -34,7 +34,7 @@ def calculate_psi(expected, actual, buckettype='bins', buckets=10, axis=0):
        axis: axis by which variables are defined, 0 for vertical, 1 for horizontal
 
     Returns:
-       psi_values: ndarray of psi values for each variable
+       psi_values: ndarray of engine values for each variable
 
     Author:
        Matthew Burke

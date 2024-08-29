@@ -15,30 +15,30 @@ class AsyncSubprocessExecutor(AsyncExecutor):
         self._cleanup_thread.daemon = True
         self._cleanup_thread.start()
 
-    def execute(self, task_id: str, target: Callable, on_target_finish: Callable[[str, bool, Exception], None],
+    def execute(self, target_id: str, target: Callable, on_target_finish: Callable[[str, bool, Exception], None],
                 args=()):
         process = multiprocessing.Process(target=target, args=args)
         process.start()
         with self.lock:
-            self.processes[task_id] = process
+            self.processes[target_id] = process
 
-    def kill(self, task_id: str):
+    def kill(self, target_id: str):
         with self.lock:
-            if task_id not in self.processes:
+            if target_id not in self.processes:
                 return False
             else:
-                process = self.processes[task_id]
+                process = self.processes[target_id]
 
         process.terminate()
-        self.logger.info(f"Task {task_id} has been terminated!")
+        self.logger.info(f"Target {target_id} has been terminated!")
         return True
 
     def kill_all(self):
         with self.lock:
             keys = self.processes.keys()
 
-        for task_id in keys:
-            self.kill(task_id)
+        for target_id in keys:
+            self.kill(target_id)
 
     def _loop_cleanup(self):
         while True:
@@ -48,13 +48,13 @@ class AsyncSubprocessExecutor(AsyncExecutor):
     def _cleanup_finished_processes(self):
         with self.lock:
             finished_processes = [
-                (task_id, proc) for task_id, proc in self.processes.items() if not proc.is_alive()]
+                (target_id, proc) for target_id, proc in self.processes.items() if not proc.is_alive()]
 
-        for task_id, process in finished_processes:
+        for target_id, process in finished_processes:
             with self.lock:
                 process.join()  # 确保进程资源释放
-                del self.processes[task_id]
-            self.logger.info(f"Cleanup finished task process {task_id}")
+                del self.processes[target_id]
+            self.logger.info(f"Cleanup finished process {target_id}")
 
     def __del__(self):
         self.kill_all()
