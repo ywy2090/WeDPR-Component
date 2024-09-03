@@ -3,7 +3,6 @@ import codecs
 import os
 import time
 
-from ppc_common.ppc_dataset import dataset_helper_factory
 from ppc_common.ppc_utils import utils, common_func
 from ppc_scheduler.workflow.common.job_context import JobContext
 
@@ -106,13 +105,14 @@ class PsiWorkerEngine:
         self.log.info(f"call psi service successfully, job_id={job_id}, result: {psi_result}")
 
     def origin_dataset_to_psi_inputs(self):
-        dataset_helper_factory.download_dataset(
-            dataset_helper_factory=self.components.dataset_handler_initializer.dataset_helper_factory,
-            dataset_user=self.job_context.user_name,
-            dataset_id=self.job_context.dataset_id,
-            dataset_local_path=self.job_context.dataset_file_path,
-            log_keyword="prepare_dataset",
-            logger=self.log)
+        # TODO: 下载数据
+        # dataset_helper_factory.download_dataset(
+        #     dataset_helper_factory=None,
+        #     dataset_user=self.job_context.user_name,
+        #     dataset_id=self.job_context.dataset_id,
+        #     dataset_local_path=self.job_context.dataset_file_path,
+        #     log_keyword="prepare_dataset",
+        #     logger=self.log)
 
         field = (self.job_context.psi_fields.split(utils.CSV_SEP)[self.job_context.my_index]).lower()
         if field == '':

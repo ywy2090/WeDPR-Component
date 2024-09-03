@@ -3,7 +3,6 @@ import os
 
 import pandas as pd
 
-from ppc_common.ppc_dataset import dataset_helper_factory
 from ppc_common.ppc_utils import utils
 from ppc_scheduler.mpc_generator.generator import CodeGenerator
 from ppc_scheduler.workflow.common.job_context import JobContext
@@ -121,7 +120,7 @@ class MpcWorkerEngine:
 
     def _make_dataset_to_mpc_data_plus_psi_data(self, my_dataset_number):
         chunk_list = pd.read_csv(self.job_context.dataset_file_path, delimiter=utils.CSV_SEP,
-                                 chunksize=self.components.dataset_handler_initializer.file_chunk_config.read_chunk_size)
+                                 chunksize=self.components.file_chunk_config.read_chunk_size)
         psi_data = pd.read_csv(self.job_context.psi_result_path, delimiter=utils.CSV_SEP)
         for chunk in chunk_list:
             self._make_dataset_field_normalized(chunk)
@@ -161,13 +160,14 @@ class MpcWorkerEngine:
         self.log.info(f"start prepare_mpc_after_psi, job_id={job_id}")
         my_dataset_number = self._get_dataset_column_count()
 
-        dataset_helper_factory.download_dataset(
-            dataset_helper_factory=self.components.dataset_handler_initializer.dataset_helper_factory,
-            dataset_user=self.job_context.user_name,
-            dataset_id=self.job_context.dataset_id,
-            dataset_local_path=self.job_context.dataset_file_path,
-            log_keyword="prepare_mpc_after_psi",
-            logger=self.log)
+        # TODO: 下载数据
+        # dataset_helper_factory.download_dataset(
+        #     dataset_helper_factory=None,
+        #     dataset_user=self.job_context.user_name,
+        #     dataset_id=self.job_context.dataset_id,
+        #     dataset_local_path=self.job_context.dataset_file_path,
+        #     log_keyword="prepare_mpc_after_psi",
+        #     logger=self.log)
 
         if not utils.file_exists(self.job_context.psi_result_path):
             self.log.info(
@@ -186,7 +186,7 @@ class MpcWorkerEngine:
 
     def _make_dataset_to_mpc_data_direct(self, my_dataset_number):
         chunk_list = pd.read_csv(self.job_context.dataset_file_path, delimiter=utils.CSV_SEP,
-                                 chunksize=self.components.dataset_handler_initializer.file_chunk_config.read_chunk_size)
+                                 chunksize=self.components.file_chunk_config.read_chunk_size)
         for chunk in chunk_list:
             self._make_dataset_field_normalized(chunk)
             self._save_selected_column_data(my_dataset_number, chunk, self.job_context.mpc_prepare_path)
@@ -195,13 +195,14 @@ class MpcWorkerEngine:
         job_id = self.job_context.job_id
         self.log.info(f"start prepare_mpc_without_psi, job_id={job_id}")
         my_dataset_number = self._get_dataset_column_count()
-        dataset_helper_factory.download_dataset(
-            dataset_helper_factory=self.components.dataset_handler_initializer.dataset_helper_factory,
-            dataset_user=self.job_context.user_name,
-            dataset_id=self.job_context.dataset_id,
-            dataset_local_path=self.job_context.dataset_file_path,
-            log_keyword="prepare_mpc_without_psi",
-            logger=self.log)
+        # TODO: 下载数据
+        # dataset_helper_factory.download_dataset(
+        #     dataset_helper_factory=None,
+        #     dataset_user=self.job_context.user_name,
+        #     dataset_id=self.job_context.dataset_id,
+        #     dataset_local_path=self.job_context.dataset_file_path,
+        #     log_keyword="prepare_mpc_without_psi",
+        #     logger=self.log)
 
         self._make_dataset_to_mpc_data_direct(my_dataset_number)
 

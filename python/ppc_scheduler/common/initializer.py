@@ -4,12 +4,12 @@ import os
 from contextlib import contextmanager
 
 import yaml
+from python.ppc_common.ppc_config.file_chunk_config import FileChunkConfig
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ppc_common.deps_services import storage_loader
 from ppc_common.ppc_async_executor.thread_event_manager import ThreadEventManager
-from ppc_common.ppc_initialize.dataset_handler_initialize import DataSetHandlerInitialize
 from ppc_common.ppc_utils import common_func
 from ppc_scheduler.job.job_manager import JobManager
 
@@ -25,9 +25,9 @@ class Initializer:
         self.sql_session = None
         self.sql_engine = None
         self.storage_client = None
+        self.file_chunk_config = None
         # 只用于测试
         self.mock_logger = None
-        self.dataset_handler_initializer = None
 
     def init_all(self):
         self.init_log()
@@ -36,7 +36,7 @@ class Initializer:
         self.init_job_manager()
         self.init_sql_client()
         self.init_storage_client()
-        self.init_others()
+        self.init_file_chunk()
 
     def init_log(self):
         logging.config.fileConfig(self.log_config_path)
@@ -79,10 +79,9 @@ class Initializer:
     def init_storage_client(self):
         self.storage_client = storage_loader.load(
             self.config_data, self.logger())
-
-    def init_others(self):
-        self.dataset_handler_initializer = DataSetHandlerInitialize(
-            self.config_data, self.logger())
+        
+    def init_file_chunk(self):
+        self.file_chunk_config = FileChunkConfig(self.config_data)
 
     def logger(self, name=None):
         if self.mock_logger is None:
