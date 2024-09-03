@@ -25,7 +25,7 @@
 #include "core/SenderDB.h"
 #include "core/TaskCommand.h"
 #include "ppc-psi/src/labeled-psi/core/LabeledPSIReceiver.h"
-#include "ppc-tars-protocol/ppc-tars-protocol/TarsSerialize.h"
+#include "wedpr-protocol/tars/TarsSerialize.h"
 
 using namespace ppc::psi;
 using namespace ppc::protocol;
@@ -122,7 +122,7 @@ void LabeledPSIImpl::asyncRunTask(
         addReceiver(receiver);
 
         // notify the taskInfo to the front
-        error = m_config->front()->notifyTaskInfo(std::make_shared<GatewayTaskInfo>(_task->id()));
+        error = m_config->front()->notifyTaskInfo(_task->id());
         if (error && error->errorCode())
         {
             onSelfError(_task->id(), error, true);
@@ -347,7 +347,7 @@ void LabeledPSIImpl::asyncRunSenderTask(
         addPendingTask(taskState);
 
         // notify the taskInfo to the front
-        error = m_config->front()->notifyTaskInfo(std::make_shared<GatewayTaskInfo>(_task->id()));
+        error = m_config->front()->notifyTaskInfo(_task->id());
         if (error && error->errorCode())
         {
             onSelfError(_task->id(), error, true);

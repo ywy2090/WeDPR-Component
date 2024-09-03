@@ -18,9 +18,16 @@
  * @date 2024-08-26
  */
 #pragma once
-#include "ppc-framework/front/IFront.h"
+#include <bcos-utilities/Common.h>
 #include <memory>
+#include <set>
+#include <sstream>
+#include <string>
 
+namespace ppc::front
+{
+class IFrontClient;
+}
 namespace ppc::protocol
 {
 // the node information
@@ -35,14 +42,14 @@ public:
     virtual bcos::bytesConstRef nodeID() const = 0;
 
     // components
-    virtual void setComponents(std::vector<std::string> const& components) = 0;
+    virtual void setComponents(std::set<std::string> const& components) = 0;
     virtual std::set<std::string> const& components() const = 0;
 
     virtual void encode(bcos::bytes& data) const = 0;
     virtual void decode(bcos::bytesConstRef data) = 0;
 
-    virtual void setFront(ppc::front::IFront::Ptr&& front) = 0;
-    virtual ppc::front::IFront::Ptr const& getFront() const = 0;
+    virtual void setFront(std::shared_ptr<ppc::front::IFrontClient>&& front) = 0;
+    virtual std::shared_ptr<ppc::front::IFrontClient> const& getFront() const = 0;
 
     virtual bool equal(INodeInfo::Ptr const& info)
     {
@@ -62,4 +69,21 @@ public:
 protected:
     bcos::bytes m_nodeID;
 };
+
+inline std::string printNodeInfo(INodeInfo::Ptr const& nodeInfo)
+{
+    if (!nodeInfo)
+    {
+        return "nullptr";
+    }
+    std::ostringstream stringstream;
+    stringstream << LOG_KV("endPoint", nodeInfo->endPoint());
+    std::string components = "";
+    for (auto const& it : nodeInfo->components())
+    {
+        components = components + it + ",";
+    }
+    stringstream << LOG_KV("components", components);
+    return stringstream.str();
+}
 }  // namespace ppc::protocol

@@ -18,8 +18,9 @@
  * @date 2024-08-26
  */
 #include "GatewayNodeInfoImpl.h"
-#include "ppc-tars-protocol/Common.h"
-#include "ppc-tars-protocol/impl/NodeInfoImpl.h"
+#include "wedpr-protocol/protobuf/Common.h"
+#include "wedpr-protocol/protobuf/NodeInfoImpl.h"
+#include "wedpr-protocol/tars/Common.h"
 
 using namespace ppctars;
 using namespace ppc::protocol;
@@ -29,21 +30,21 @@ using namespace ppc::gateway;
 // the gateway nodeID
 std::string const& GatewayNodeInfoImpl::p2pNodeID() const
 {
-    return m_inner()->p2pNodeID;
+    return m_inner()->p2pnodeid();
 }
 // the agency
 std::string const& GatewayNodeInfoImpl::agency() const
 {
-    return m_inner()->agency;
+    return m_inner()->agency();
 }
 
 uint32_t GatewayNodeInfoImpl::statusSeq() const
 {
-    return m_inner()->statusSeq;
+    return m_inner()->statusseq();
 }
 void GatewayNodeInfoImpl::setStatusSeq(uint32_t statusSeq)
 {
-    m_inner()->statusSeq = statusSeq;
+    m_inner()->set_statusseq(statusSeq);
 }
 
 // get the node information by nodeID
@@ -96,10 +97,10 @@ void GatewayNodeInfoImpl::removeNodeInfo(bcos::bytes const& nodeID)
     }
 }
 
-std::vector<ppc::front::IFront::Ptr> GatewayNodeInfoImpl::chooseRouteByComponent(
+std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::chooseRouteByComponent(
     bool selectAll, std::string const& component) const
 {
-    std::vector<ppc::front::IFront::Ptr> result;
+    std::vector<std::shared_ptr<ppc::front::IFrontClient>> result;
     bcos::ReadGuard l(x_nodeList);
     for (auto const& it : m_nodeList)
     {
@@ -116,9 +117,10 @@ std::vector<ppc::front::IFront::Ptr> GatewayNodeInfoImpl::chooseRouteByComponent
 }
 
 
-vector<ppc::front::IFront::Ptr> GatewayNodeInfoImpl::chooseRouterByAgency(bool selectAll) const
+std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::chooseRouterByAgency(
+    bool selectAll) const
 {
-    std::vector<ppc::front::IFront::Ptr> result;
+    std::vector<std::shared_ptr<ppc::front::IFrontClient>> result;
     bcos::ReadGuard l(x_nodeList);
     for (auto const& it : m_nodeList)
     {
@@ -131,10 +133,10 @@ vector<ppc::front::IFront::Ptr> GatewayNodeInfoImpl::chooseRouterByAgency(bool s
     return result;
 }
 
-std::vector<ppc::front::IFront::Ptr> GatewayNodeInfoImpl::chooseRouterByTopic(
+std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::chooseRouterByTopic(
     bool selectAll, std::string const& topic) const
 {
-    std::vector<ppc::front::IFront::Ptr> result;
+    std::vector<std::shared_ptr<ppc::front::IFrontClient>> result;
     bcos::ReadGuard l(x_topicInfo);
     for (auto const& it : m_topicInfo)
     {
@@ -182,34 +184,30 @@ void GatewayNodeInfoImpl::unRegisterTopic(bcos::bytes const& nodeID, std::string
 
 void GatewayNodeInfoImpl::encode(bcos::bytes& data) const
 {
-    m_inner()->nodeList.clear();
+    m_inner()->clear_nodelist();
     {
         bcos::ReadGuard l(x_nodeList);
         // encode nodeList
         for (auto const& it : m_nodeList)
         {
             auto nodeInfo = std::dynamic_pointer_cast<NodeInfoImpl>(it.second);
-            m_inner()->nodeList.emplace_back(nodeInfo->inner());
+            m_inner()->mutable_nodelist()->UnsafeArenaAddAllocated(nodeInfo->innerFunc()());
         }
     }
-    tars::TarsOutputStream<serialize::BufferWriterByteVector> output;
-    m_inner()->writeTo(output);
-    output.getByteBuffer().swap(data);
+    encodePBObject(data, m_inner());
 }
 
 void GatewayNodeInfoImpl::decode(bcos::bytesConstRef data)
 {
-    tars::TarsInputStream<tars::BufferReader> input;
-    input.setBuffer((const char*)data.data(), data.size());
-    m_inner()->readFrom(input);
+    decodePBObject(m_inner(), data);
     {
         bcos::WriteGuard l(x_nodeList);
         // decode into m_nodeList
         m_nodeList.clear();
-        for (auto& it : m_inner()->nodeList)
+        for (int i = 0; i < m_inner()->nodelist_size(); i++)
         {
-            auto nodeInfoPtr =
-                std::make_shared<NodeInfoImpl>([m_entry = it]() mutable { return &m_entry; });
+            auto nodeInfoPtr = std::make_shared<NodeInfoImpl>(
+                [m_entry = m_inner()->nodelist(i)]() mutable { return &m_entry; });
             m_nodeList.insert(std::make_pair(nodeInfoPtr->nodeID().toBytes(), nodeInfoPtr));
         }
     }

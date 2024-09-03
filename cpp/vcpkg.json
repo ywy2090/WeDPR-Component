@@ -51,6 +51,10 @@
     { 
       "name": "libsodium",
       "version": "1.0.18#9" 
+    },
+    { 
+      "name": "grpc",
+      "version": "1.51.1#1"
     }
   ],
   "features": {
@@ -89,6 +93,10 @@
         {
           "name": "mysql-connector-cpp",
           "version>=": "8.0.32"
+        },
+        {
+          "name": "grpc",
+          "version>=": "1.51.1"
         },
         "libhdfs3",
         "tarscpp",

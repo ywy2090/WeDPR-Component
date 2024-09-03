@@ -57,14 +57,16 @@ public:
      * @param timeout timeout
      * @param callback callback
      */
-    virtual void asyncSendMessage(ppc::protocol::RouteType routeType, std::string const& topic,
-        std::string const& dstInst, bcos::bytes const& dstNodeID, std::string const& componentType,
-        bcos::bytes&& payload, long timeout, ppc::protocol::ReceiveMsgFunc callback) = 0;
+    virtual void asyncSendMessage(ppc::protocol::RouteType routeType,
+        ppc::protocol::MessageOptionalHeader::Ptr const& routeInfo, bcos::bytes&& payload,
+        long timeout, ppc::protocol::ReceiveMsgFunc callback) = 0;
 
-    virtual void registerNodeInfo(ppc::protocol::INodeInfo::Ptr const& nodeInfo);
-    virtual void unRegisterNodeInfo(bcos::bytesConstRef nodeID);
-    virtual void registerTopic(bcos::bytesConstRef nodeID, std::string const& topic);
-    virtual void unRegisterTopic(bcos::bytesConstRef nodeID, std::string const& topic);
+    virtual void asyncSendbroadcastMessage(ppc::protocol::RouteType routeType,
+        ppc::protocol::MessageOptionalHeader::Ptr const& routeInfo, bcos::bytes&& payload) = 0;
+    virtual void registerNodeInfo(ppc::protocol::INodeInfo::Ptr const& nodeInfo) = 0;
+    virtual void unRegisterNodeInfo(bcos::bytesConstRef nodeID) = 0;
+    virtual void registerTopic(bcos::bytesConstRef nodeID, std::string const& topic) = 0;
+    virtual void unRegisterTopic(bcos::bytesConstRef nodeID, std::string const& topic) = 0;
 };
 
 }  // namespace ppc::gateway
