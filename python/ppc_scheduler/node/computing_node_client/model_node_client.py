@@ -8,8 +8,8 @@ GET_MODEL_LOG_API_PREFIX = "/api/ppc-model/pml/record-model-log/"
 
 
 class ModelClient:
-    def __init__(self, log, endpoint, polling_interval_s: int = 5, max_retries: int = 5, retry_delay_s: int = 5):
-        self.log = log
+    def __init__(self, logger, endpoint, polling_interval_s: int = 5, max_retries: int = 5, retry_delay_s: int = 5):
+        self.logger = logger
         self.endpoint = endpoint
         self.polling_interval_s = polling_interval_s
         self.max_retries = max_retries
@@ -20,7 +20,7 @@ class ModelClient:
     def run(self, args):
         task_id = args['task_id']
         try:
-            self.log.info(f"ModelApi: begin to run model task {task_id}")
+            self.logger.info(f"ModelApi: begin to run model task {task_id}")
             response = self._send_request_with_retry(http_utils.send_post_request,
                                                      endpoint=self.endpoint,
                                                      uri=RUN_MODEL_API_PREFIX + task_id,
@@ -28,20 +28,20 @@ class ModelClient:
             check_response(response)
             return self._poll_task_status(task_id)
         except Exception as e:
-            self.log.error(f"ModelApi: run model task error, task: {task_id}, error: {e}")
+            self.logger.error(f"ModelApi: run model task error, task: {task_id}, error: {e}")
             raise e
 
     def kill(self, job_id):
         try:
-            self.log.info(f"ModelApi: begin to kill model task {job_id}")
+            self.logger.info(f"ModelApi: begin to kill model task {job_id}")
             response = self._send_request_with_retry(http_utils.send_delete_request,
                                                      endpoint=self.endpoint,
                                                      uri=RUN_MODEL_API_PREFIX + job_id)
             check_response(response)
-            self.log.info(f"ModelApi: model task {job_id} was killed")
+            self.logger.info(f"ModelApi: model task {job_id} was killed")
             return response
         except Exception as e:
-            self.log.warn(f"ModelApi: kill model task {job_id} failed, error: {e}")
+            self.logger.warn(f"ModelApi: kill model task {job_id} failed, error: {e}")
             raise e
 
     def _poll_task_status(self, task_id):
@@ -51,10 +51,10 @@ class ModelClient:
                                                      uri=RUN_MODEL_API_PREFIX + task_id)
             check_response(response)
             if response['data']['status'] == self._completed_status:
-                self.log.info(f"task {task_id} completed, response: {response['data']}")
+                self.logger.info(f"task {task_id} completed, response: {response['data']}")
                 return response
             elif response['data']['status'] == self._failed_status:
-                self.log.warn(f"task {task_id} failed, response: {response['data']}")
+                self.logger.warn(f"task {task_id} failed, response: {response['data']}")
                 raise PpcException(PpcErrorCode.CALL_SCS_ERROR.get_code(), response['data'])
             else:
                 time.sleep(self.polling_interval_s)
@@ -73,12 +73,12 @@ class ModelClient:
                 response = request_func(*args, **kwargs)
                 return response
             except Exception as e:
-                self.log.warn(f"Request failed: {e}, attempt {attempt + 1}/{self.max_retries}")
+                self.logger.warn(f"Request failed: {e}, attempt {attempt + 1}/{self.max_retries}")
                 attempt += 1
                 if attempt < self.max_retries:
                     time.sleep(self.retry_delay_s)
                 else:
-                    self.log.warn(f"Request failed after {self.max_retries} attempts")
+                    self.logger.warn(f"Request failed after {self.max_retries} attempts")
                     raise e
 
 

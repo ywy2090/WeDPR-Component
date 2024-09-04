@@ -4,61 +4,45 @@ import os
 from contextlib import contextmanager
 
 import yaml
-from python.ppc_common.ppc_config.file_chunk_config import FileChunkConfig
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ppc_common.deps_services import storage_loader
-from ppc_common.ppc_async_executor.thread_event_manager import ThreadEventManager
 from ppc_common.ppc_utils import common_func
-from ppc_scheduler.job.job_manager import JobManager
-
 
 class Initializer:
-    def __init__(self, log_config_path, config_path):
-        self.job_cache_dir = None
-        self.log_config_path = log_config_path
-        self.config_path = config_path
+    def __init__(self):
         self.config_data = None
-        self.job_manager = None
-        self.thread_event_manager = None
+        self.job_cache_dir = None
+        self.config_data = None
         self.sql_session = None
         self.sql_engine = None
         self.storage_client = None
-        self.file_chunk_config = None
-        # 只用于测试
-        self.mock_logger = None
 
-    def init_all(self):
-        self.init_log()
+    def init_all(self, config_data):
+        self.config_data = config_data
+        
+        # self.init_log()
+        # self.init_config()
         self.init_cache()
-        self.init_config()
-        self.init_job_manager()
         self.init_sql_client()
         self.init_storage_client()
-        self.init_file_chunk()
-
-    def init_log(self):
-        logging.config.fileConfig(self.log_config_path)
+    
+    @staticmethod    
+    def init_config(config_path: str):
+        with open(config_path, 'rb') as f:
+            config_data = yaml.safe_load(f.read())
+            return config_data
+        
+    @staticmethod
+    def init_log(log_config_path: str):
+        logging.config.fileConfig(log_config_path)
 
     def init_cache(self):
         self.job_cache_dir = common_func.get_config_value(
             "JOB_TEMP_DIR", "/tmp", self.config_data, False)
         if not os.path.exists(self.job_cache_dir):
             os.makedirs(self.job_cache_dir)
-
-    def init_config(self):
-        with open(self.config_path, 'rb') as f:
-            self.config_data = yaml.safe_load(f.read())
-
-    def init_job_manager(self):
-        self.thread_event_manager = ThreadEventManager()
-        self.job_manager = JobManager(
-            logger=self.logger(),
-            thread_event_manager=self.thread_event_manager,
-            workspace=self.config_data['WORKSPACE'],
-            job_timeout_h=self.config_data['JOB_TIMEOUT_H']
-        )
 
     def init_sql_client(self):
         self.sql_engine = create_engine(self.config_data['SQLALCHEMY_DATABASE_URI'], pool_pre_ping=True)
@@ -79,12 +63,10 @@ class Initializer:
     def init_storage_client(self):
         self.storage_client = storage_loader.load(
             self.config_data, self.logger())
-        
-    def init_file_chunk(self):
-        self.file_chunk_config = FileChunkConfig(self.config_data)
 
-    def logger(self, name=None):
-        if self.mock_logger is None:
-            return logging.getLogger(name)
-        else:
-            return self.mock_logger
+    def update_thread_event_manager(self, thread_event_manager):
+        self.thread_event_manager = thread_event_manager
+
+    @staticmethod
+    def logger(name=None):
+        return logging.getLogger(name)

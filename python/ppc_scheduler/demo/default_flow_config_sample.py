@@ -1,35 +1,34 @@
 flow_dict = {
+    
+    "SHELL": [
+        {
+            "index": 1,
+            "type": "T_SHELL"
+        },
+        {
+            "index": 2,
+            "type": "T_SHELL",
+            "upstreams": [
+                {
+                    "index": 1
+                }
+            ]
+        },
+        {
+            "index": 3,
+            "type": "T_SHELL",
+            "upstreams": [
+                {
+                    "index": 2
+                }
+            ]
+        }
+    ],
+    
     "PSI": [
         {
             "index": 1,
-            "type": "T_PSI",
-            "isParamsProvided": False,
-            "params": {
-                "type": 0,
-                "algorithm": 0,
-                "syncResult": True,
-                "parties": [
-                    {
-                        "index": "",
-                        "partyIndex": 1
-                    },
-                    {
-                        "index": "",
-                        "partyIndex": 0,
-                        "data": {
-                            "index": "",
-                            "input": {
-                                "type": 2,
-                                "path": ""
-                            },
-                            "output": {
-                                "type": 2,
-                                "path": ""
-                            }
-                        }
-                    }
-                ]
-            }
+            "type": "T_PSI"
         }
     ],
 
