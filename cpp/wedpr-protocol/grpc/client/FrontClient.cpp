@@ -18,16 +18,13 @@
  * @date 2024-09-02
  */
 #include "FrontClient.h"
+#include "protobuf/RequestConverter.h"
 #include "wedpr-protocol/protobuf/Common.h"
 
 
 using namespace ppc::protocol;
 using namespace ppc::proto;
-using grpc::Channel;
-using grpc::ClientAsyncResponseReader;
-using grpc::ClientContext;
-using grpc::CompletionQueue;
-using grpc::Status;
+using namespace grpc;
 
 void FrontClient::onReceiveMessage(ppc::protocol::Message::Ptr const& msg, ReceiveMsgFunc callback)
 {
@@ -37,15 +34,8 @@ void FrontClient::onReceiveMessage(ppc::protocol::Message::Ptr const& msg, Recei
     msg->encode(encodedData);
     receivedMsg.set_data(encodedData.data(), encodedData.size());
 
-    auto grpcCallback = [callback](ClientContext const&, Status const& status, Error&& response) {
-        auto error = std::make_shared<bcos::Error>(response.errorcode(), response.errormessage());
-        callback(error);
-    };
-
-    auto call = std::make_shared<AsyncClientCall>(grpcCallback);
-    call->responseReader =
-        m_stub->PrepareAsynconReceiveMessage(&call->context, receivedMsg, &m_client->queue());
-    call->responseReader->StartCall();
-    // send request, upon completion of the RPC, "reply" be updated with the server's response
-    call->responseReader->Finish(&call->reply, &call->status, (void*)call.get());
+    ClientContext context;
+    auto response = std::make_shared<Error>();
+    m_stub->async()->onReceiveMessage(&context, &receivedMsg, response.get(),
+        [response, callback](Status status) { callback(toError(status, std::move(*response))); });
 }
