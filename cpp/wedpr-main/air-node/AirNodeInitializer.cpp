@@ -18,13 +18,13 @@
  * @date 2022-11-14
  */
 #include "AirNodeInitializer.h"
-#include "ppc-gateway/Gateway.h"
-#include "ppc-gateway/GatewayConfigContext.h"
+#include "ppc-front/LocalFrontBuilder.h"
+#include "ppc-gateway/GatewayFactory.h"
 #include "ppc-rpc/src/RpcFactory.h"
 #include "ppc-rpc/src/RpcMemory.h"
-#include "ppc-storage/src/redis/RedisStorage.h"
 
 using namespace ppc::protocol;
+using namespace ppc::front;
 using namespace ppc::node;
 using namespace ppc::gateway;
 using namespace ppc::rpc;
@@ -32,6 +32,10 @@ using namespace ppc::storage;
 using namespace ppc::initializer;
 using namespace bcos;
 
+AirNodeInitializer::AirNodeInitializer()
+{
+    m_frontBuilder = std::make_shared<LocalFrontBuilder>();
+}
 void AirNodeInitializer::init(std::string const& _configPath)
 {
     // init the log
@@ -44,31 +48,30 @@ void AirNodeInitializer::init(std::string const& _configPath)
 
     // init the node
     m_nodeInitializer = std::make_shared<Initializer>(_configPath);
-    m_nodeInitializer->init(ppc::protocol::NodeArch::AIR);
-    auto front = m_nodeInitializer->frontInitializer()->front();
-    front->setSelfEndPoint("localhost");
 
     // init the gateway
     initGateway(_configPath);
-    // set the gateway into front
-    front->setGatewayInterface(m_gateway);
+    // init the node
+    m_nodeInitializer->init(ppc::protocol::NodeArch::AIR, m_gateway);
+    // set the created front to the builder
+    m_frontBuilder->setFront(m_nodeInitializer->transport()->getFront());
+    // register the NodeInfo
+    m_gateway->registerNodeInfo(m_nodeInitializer->config()->frontConfig()->generateNodeInfo());
 
     INIT_LOG(INFO) << LOG_DESC("init the rpc");
     // load the rpc config
     // not specify the certPath in air-mode
     m_nodeInitializer->config()->loadRpcConfig(nullptr, pt);
     // init RpcStatusInterface
-    RpcStatusInterface::Ptr rpcStatusInterface = std::make_shared<ppc::rpc::RpcMemory>(m_gateway);
+    RpcStatusInterface::Ptr rpcStatusInterface = std::make_shared<ppc::rpc::RpcMemory>();
 
-    m_nodeInitializer->frontInitializer()->setRpcStatus(rpcStatusInterface);
+
     auto rpcFactory = std::make_shared<RpcFactory>(m_nodeInitializer->config()->agencyID());
     m_rpc = rpcFactory->buildRpc(m_nodeInitializer->config());
     m_rpc->setRpcStorage(rpcStatusInterface);
     m_rpc->setBsEcdhPSI(m_nodeInitializer->bsEcdhPsi());
     m_nodeInitializer->registerRpcHandler(m_rpc);
 
-    // Note: only can fetchAgencyList after the gatewayInterface has been setted into front
-    m_nodeInitializer->fetchAgencyList();
     INIT_LOG(INFO) << LOG_DESC("init the rpc success");
 }
 
@@ -82,13 +85,8 @@ void AirNodeInitializer::initGateway(std::string const& _configPath)
     auto threadPool = std::make_shared<bcos::ThreadPool>(
         "gateway", config->gatewayConfig().networkConfig.threadPoolSize);
 
-    // Note: no need use redis as cache in-air-mode
-    GatewayFactory gatewayFactory;
-    auto gateway = gatewayFactory.buildGateway(ppc::protocol::NodeArch::AIR, config, nullptr,
-        m_nodeInitializer->protocolInitializer()->ppcMsgFactory(), threadPool);
-    auto frontInitializer = m_nodeInitializer->frontInitializer();
-    gateway->registerFront(frontInitializer->front()->selfEndPoint(), frontInitializer->front());
-    m_gateway = gateway;
+    GatewayFactory gatewayFactory(config);
+    m_gateway = gatewayFactory.build(m_frontBuilder);
 }
 
 void AirNodeInitializer::start()

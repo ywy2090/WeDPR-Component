@@ -17,15 +17,18 @@
  * @author: yujiechen
  * @date 2022-11-14
  */
-#include "AirNodeInitializer.h"
+
 #include <execinfo.h>
 #include <libhelper/CommandHelper.h>
 #include <libhelper/ExitHandler.h>
 #include <stdexcept>
 #include <thread>
 
-using namespace ppc;
-int main(int argc, const char* argv[])
+namespace ppc::node
+{
+template <typename T>
+int startProgram(
+    int argc, const char* argv[], std::string const& binaryName, std::shared_ptr<T>& starter)
 {
     /// set LC_ALL
     setDefaultOrCLocale();
@@ -43,35 +46,35 @@ int main(int argc, const char* argv[])
         abort();
     });
     // get datetime and output welcome info
-    ExitHandler exitHandler;
-    signal(SIGTERM, &ExitHandler::exitHandler);
-    signal(SIGABRT, &ExitHandler::exitHandler);
-    signal(SIGINT, &ExitHandler::exitHandler);
+    ppc::ExitHandler exitHandler;
+    signal(SIGTERM, &ppc::ExitHandler::exitHandler);
+    signal(SIGABRT, &ppc::ExitHandler::exitHandler);
+    signal(SIGINT, &ppc::ExitHandler::exitHandler);
 
     // Note: the initializer must exist in the life time of the whole program
-    auto initializer = std::make_shared<ppc::node::AirNodeInitializer>();
     try
     {
-        auto param = initCommandLine(argc, argv);
-        initializer->init(param.configFilePath);
-        initializer->start();
+        auto param = ppc::initCommandLine(argc, argv);
+        starter->init(param.configFilePath);
+        starter->start();
     }
     catch (std::exception const& e)
     {
         printVersion();
         std::cout << "[" << bcos::getCurrentDateTime() << "] ";
-        std::cout << "start ppc-psi failed, error:" << boost::diagnostic_information(e)
+        std::cout << "start " + binaryName + " failed, error:" << boost::diagnostic_information(e)
                   << std::endl;
         return -1;
     }
     printVersion();
     std::cout << "[" << bcos::getCurrentDateTime() << "] ";
-    std::cout << "The ppc-psi is running..." << std::endl;
+    std::cout << "The " + binaryName + "is running..." << std::endl;
     while (!exitHandler.shouldExit())
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
-    initializer.reset();
+    starter.reset();
     std::cout << "[" << bcos::getCurrentDateTime() << "] ";
-    std::cout << "ppc-psi program exit normally." << std::endl;
+    std::cout << "The" + binaryName + " program exit normally." << std::endl;
 }
+}  // namespace ppc::node

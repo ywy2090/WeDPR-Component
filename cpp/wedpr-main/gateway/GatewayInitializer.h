@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 WeDPR.
+ *  Copyright (C) 2022 WeDPR.
  *  SPDX-License-Identifier: Apache-2.0
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,32 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file ProTransportImpl.h
+ * @file GatewayInitializer.h
  * @author: yujiechen
- * @date 2024-09-04
+ * @date 2022-11-14
  */
 #pragma once
-#include "TransportImpl.h"
+#include "ppc-framework/gateway/IGateway.h"
+#include <bcos-utilities/BoostLogInitializer.h>
+#include <bcos-utilities/Log.h>
+#include <memory>
 
+#define INIT_LOG(LEVEL) BCOS_LOG(LEVEL) << LOG_BADGE("GATEWAYInit")
 namespace ppc::protocol
 {
 class GrpcServer;
 }
-
-
-namespace ppc::sdk
+namespace ppc::gateway
 {
-class ProTransportImpl : public Transport
+class GatewayInitializer
 {
 public:
-    using Ptr = std::shared_ptr<ProTransportImpl>;
-    ProTransportImpl(ppc::front::FrontConfig::Ptr config);
+    using Ptr = std::shared_ptr<GatewayInitializer>;
+    GatewayInitializer() = default;
+    virtual ~GatewayInitializer() { stop(); }
 
-    void start() override;
-    void stop() override;
+    virtual void init(std::string const& _configPath);
+    virtual void start();
+    virtual void stop();
 
 protected:
-    ppc::front::FrontConfig::Ptr m_config;
+    bcos::BoostLogInitializer::Ptr m_logInitializer;
+    ppc::gateway::IGateway::Ptr m_gateway;
     std::shared_ptr<ppc::protocol::GrpcServer> m_server;
 };
-}  // namespace ppc::sdk
+}  // namespace ppc::gateway

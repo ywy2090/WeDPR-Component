@@ -1,4 +1,4 @@
-/*
+/**
  *  Copyright (C) 2022 WeDPR.
  *  SPDX-License-Identifier: Apache-2.0
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,34 +13,46 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file CEMInitializer.h
- * @author: caryliao
- * @date 2022-11-19
+ * @file AirNodeInitializer.h
+ * @author: yujiechen
+ * @date 2022-11-14
  */
 #pragma once
-#include "libinitializer/Common.h"
-#include "ppc-rpc/src/RpcFactory.h"
+#include "ppc-framework/front/IFront.h"
+#include "ppc-framework/gateway/IGateway.h"
+#include "wedpr-initializer/Common.h"
+#include "wedpr-initializer/Initializer.h"
 #include <bcos-utilities/BoostLogInitializer.h>
 #include <memory>
 namespace ppc::rpc
 {
 class Rpc;
 }
-namespace ppc::cem
+namespace ppc::front
 {
-class CEMInitializer
+class LocalFrontBuilder;
+}
+namespace ppc::node
+{
+class AirNodeInitializer
 {
 public:
-    using Ptr = std::shared_ptr<CEMInitializer>;
-    CEMInitializer() {}
-    virtual ~CEMInitializer() { stop(); }
+    using Ptr = std::shared_ptr<AirNodeInitializer>;
+    AirNodeInitializer();
+    virtual ~AirNodeInitializer() { stop(); }
 
     virtual void init(std::string const& _configPath);
     virtual void start();
     virtual void stop();
 
+protected:
+    virtual void initGateway(std::string const& _configPath);
+
 private:
     bcos::BoostLogInitializer::Ptr m_logInitializer;
+    ppc::initializer::Initializer::Ptr m_nodeInitializer;
+    ppc::gateway::IGateway::Ptr m_gateway;
     std::shared_ptr<ppc::rpc::Rpc> m_rpc;
+    std::shared_ptr<ppc::front::LocalFrontBuilder> m_frontBuilder;
 };
-}  // namespace ppc::cem
+}  // namespace ppc::node

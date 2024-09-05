@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 WeDPR.
+ *  Copyright (C) 2023 WeDPR.
  *  SPDX-License-Identifier: Apache-2.0
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,32 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file main.cpp
+ * @file RemoteFrontBuilder.h
  * @author: yujiechen
- * @date 2022-11-25
+ * @date 2024-09-4
  */
-#include "ProNodeServiceApp.h"
-#include "libhelper/CommandHelper.h"
+#pragma once
+#include "ppc-framework/front/IFront.h"
+#include "ppc-framework/protocol/GrpcConfig.h"
 
-using namespace ppctars;
-
-int main(int argc, char* argv[])
+namespace ppc::front
 {
-    try
-    {
-        ppc::initAppCommandLine(argc, argv);
-        ProNodeServiceApp app;
-        app.main(argc, argv);
-        app.waitForShutdown();
-        return 0;
-    }
-    catch (std::exception& e)
-    {
-        cerr << "ppc-pro-node std::exception:" << boost::diagnostic_information(e) << std::endl;
-    }
-    catch (...)
-    {
-        cerr << "ppc-pro-node unknown exception." << std::endl;
-    }
-    return -1;
-}
+class RemoteFrontBuilder : public IFrontBuilder
+{
+public:
+    using Ptr = std::shared_ptr<RemoteFrontBuilder>;
+    RemoteFrontBuilder(ppc::protocol::GrpcConfig::Ptr const& grpcConfig) : m_grpcConfig(grpcConfig)
+    {}
+    ~RemoteFrontBuilder() override = default;
+
+    IFrontClient::Ptr buildClient(std::string endPoint) const override;
+
+private:
+    ppc::protocol::GrpcConfig::Ptr m_grpcConfig;
+};
+}  // namespace ppc::front

@@ -13,32 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file ProTransportImpl.h
+ * @file GrpcConfig.h
  * @author: yujiechen
- * @date 2024-09-04
+ * @date 2024-09-02
  */
 #pragma once
-#include "TransportImpl.h"
+#include "ppc-framework/protocol/EndPoint.h"
+#include <memory>
+#include <string>
 
 namespace ppc::protocol
 {
-class GrpcServer;
-}
-
-
-namespace ppc::sdk
+struct GrpcServerConfig
 {
-class ProTransportImpl : public Transport
+    ppc::protocol::EndPoint endPoint;
+
+    std::string listenEndPoint() const { return endPoint.listenEndPoint(); }
+};
+class GrpcConfig
 {
 public:
-    using Ptr = std::shared_ptr<ProTransportImpl>;
-    ProTransportImpl(ppc::front::FrontConfig::Ptr config);
+    using Ptr = std::shared_ptr<GrpcConfig>;
+    GrpcConfig() = default;
+    virtual ~GrpcConfig() = default;
 
-    void start() override;
-    void stop() override;
+    std::string const& loadBalancePolicy() const { return m_loadBanlancePolicy; }
+    void setLoadBalancePolicy(std::string const& loadBanlancePolicy)
+    {
+        m_loadBanlancePolicy = loadBanlancePolicy;
+    }
 
-protected:
-    ppc::front::FrontConfig::Ptr m_config;
-    std::shared_ptr<ppc::protocol::GrpcServer> m_server;
+private:
+    std::string m_loadBanlancePolicy = "round_robin";
 };
-}  // namespace ppc::sdk
+}  // namespace ppc::protocol

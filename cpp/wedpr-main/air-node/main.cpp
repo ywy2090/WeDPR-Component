@@ -1,5 +1,5 @@
-/**
- *  Copyright (C) 2023 WeDPR.
+/*
+ *  Copyright (C) 2022 WeDPR.
  *  SPDX-License-Identifier: Apache-2.0
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,32 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file ProTransportImpl.h
+ * @file main.cpp
  * @author: yujiechen
- * @date 2024-09-04
+ * @date 2022-11-14
  */
-#pragma once
-#include "TransportImpl.h"
+#include "AirNodeInitializer.h"
+#include "wedpr-main/common/NodeStarter.h"
 
-namespace ppc::protocol
+int main(int argc, const char* argv[])
 {
-class GrpcServer;
+   auto initializer = std::make_shared<ppc::node::AirNodeInitializer>();
+    startProgram(argc, argv, "ppc-psi", initializer);
 }
-
-
-namespace ppc::sdk
-{
-class ProTransportImpl : public Transport
-{
-public:
-    using Ptr = std::shared_ptr<ProTransportImpl>;
-    ProTransportImpl(ppc::front::FrontConfig::Ptr config);
-
-    void start() override;
-    void stop() override;
-
-protected:
-    ppc::front::FrontConfig::Ptr m_config;
-    std::shared_ptr<ppc::protocol::GrpcServer> m_server;
-};
-}  // namespace ppc::sdk
