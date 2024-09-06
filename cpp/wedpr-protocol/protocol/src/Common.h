@@ -14,33 +14,16 @@
  *  limitations under the License.
  *
  * @file Common.h
- * @author: shawnhe
- * @date 2022-10-23
+ * @author: yujiechen
+ * @date 2024-9-6
  */
 
 #pragma once
 
 #include "ppc-framework/Common.h"
 #include <bcos-utilities/BoostLog.h>
-#include <bcos-utilities/Common.h>
-#include <bcos-utilities/Error.h>
-#include <json/json.h>
-#include <boost/algorithm/string/split.hpp>
-#include <functional>
 
 namespace ppc::gateway
 {
-#define GATEWAY_LOG(LEVEL) BCOS_LOG(LEVEL) << "[GATEWAY]"
-#define SERVICE_LOG(LEVEL) BCOS_LOG(LEVEL) << "[GATEWAY][SERVICE]"
-#define SERVICE_ROUTER_LOG(LEVEL) BCOS_LOG(LEVEL) << "[GATEWAY][SERVICE][ROUTER]"
-
-// HTTP HEADER DEFINE
-#define HEAD_TASK_ID "x-ptp-session-id"
-#define HEAD_ALGO_TYPE "x-ptp-algorithm-type"
-#define HEAD_TASK_TYPE "x-ptp-task-type"
-#define HEAD_SENDER_ID "x-ptp-sender-id"
-#define HEAD_MESSAGE_TYPE "x-ptp-message-type"
-#define HEAD_IS_RESPONSE "x-ptp-is-response"
-#define HEAD_SEQ "x-ptp-seq"
-#define HEAD_UUID "x-ptp-uuid"
+#define PROTOCOL_LOG(LEVEL) BCOS_LOG(LEVEL) << "[PROTOCOL]"
 }  // namespace ppc::gateway
