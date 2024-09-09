@@ -19,6 +19,7 @@
  */
 
 #pragma once
+#include "bcos-utilities/Timer.h"
 #include "ppc-framework/front/FrontInterface.h"
 #include "ppc-framework/front/IFront.h"
 #include "ppc-framework/protocol/PPCMessageFace.h"
@@ -29,8 +30,11 @@ class Front : public FrontInterface, public std::enable_shared_from_this<Front>
 {
 public:
     using Ptr = std::shared_ptr<Front>;
-    Front(IFront::Ptr front) : m_front(std::move(front)) {}
+    Front(ppc::front::PPCMessageFaceFactory::Ptr ppcMsgFactory, IFront::Ptr front);
     ~Front() override {}
+
+    void start() override;
+    void stop() override;
 
     /**
      * @brief: send message to other party by gateway
@@ -62,7 +66,7 @@ public:
     {
         uint16_t type = ((uint16_t)_taskType << 8) | _algorithmType;
         auto self = weak_from_this();
-        m_front->registerTopicHandler(
+        m_front->registerMessageHandler(
             std::to_string(type), [self, _handler](ppc::protocol::Message::Ptr msg) {
                 auto front = self.lock();
                 if (!front)
@@ -78,8 +82,24 @@ public:
             });
     }
 
+    std::vector<std::string> agencies() const override
+    {
+        bcos::ReadGuard l(x_agencyList);
+        return m_agencyList;
+    }
+
+protected:
+    void fetchGatewayMetaInfo();
+
 private:
     IFront::Ptr m_front;
+
+    // the agency list
+    std::vector<std::string> m_agencyList;
+    mutable bcos::SharedMutex x_agencyList;
+
+    std::shared_ptr<bcos::Timer> m_fetcher;
+
     ppc::front::PPCMessageFaceFactory::Ptr m_messageFactory;
 };
 }  // namespace ppc::front

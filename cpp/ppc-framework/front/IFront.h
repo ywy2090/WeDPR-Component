@@ -71,6 +71,8 @@ public:
     virtual void registerTopicHandler(
         std::string const& topic, ppc::protocol::MessageDispatcherCallback callback) = 0;
 
+    virtual void registerMessageHandler(
+        std::string const& componentType, ppc::protocol::MessageDispatcherCallback callback) = 0;
     /**
      * @brief async send message
      *
@@ -99,6 +101,8 @@ public:
     virtual ppc::protocol::Message::Ptr pop(std::string const& topic, long timeoutMs) = 0;
     virtual ppc::protocol::Message::Ptr peek(std::string const& topic) = 0;
 
+    virtual void asyncGetAgencies(
+        std::function<void(bcos::Error::Ptr, std::vector<std::string>)> callback) = 0;
 
     /**
      * @brief register the nodeInfo to the gateway

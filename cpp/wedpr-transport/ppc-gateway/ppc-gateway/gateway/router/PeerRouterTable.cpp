@@ -19,6 +19,7 @@
  */
 #include "PeerRouterTable.h"
 #include "ppc-framework/Common.h"
+#include "ppc-framework/Helper.h"
 #include <random>
 
 using namespace bcos;
@@ -65,6 +66,17 @@ void PeerRouterTable::updateGatewayInfo(GatewayNodeInfo::Ptr const& gatewayInfo)
     }
     // update agency => gatewayInfos
     m_agency2GatewayInfos[gatewayInfo->agency()].insert(gatewayInfo);
+}
+
+std::vector<std::string> PeerRouterTable::agencies() const
+{
+    std::vector<std::string> agencies;
+    bcos::ReadGuard l(x_mutex);
+    for (auto const& it : m_agency2GatewayInfos)
+    {
+        agencies.emplace_back(it.first);
+    }
+    return agencies;
 }
 
 GatewayNodeInfos PeerRouterTable::selectRouter(

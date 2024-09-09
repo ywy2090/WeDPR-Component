@@ -104,6 +104,12 @@ public:
         m_callbackManager->registerTopicHandler(topic, callback);
     }
 
+    void registerMessageHandler(std::string const& componentType,
+        ppc::protocol::MessageDispatcherCallback callback) override
+    {
+        m_callbackManager->registerMessageHandler(componentType, callback);
+    }
+
     /**
      * @brief register the nodeInfo to the gateway
      * @param nodeInfo the nodeInfo
@@ -133,6 +139,12 @@ public:
     {
         FRONT_LOG(INFO) << LOG_DESC("register topic: ") << topic;
         m_gatewayClient->registerTopic(bcos::ref(m_nodeID), topic);
+    }
+
+    void asyncGetAgencies(
+        std::function<void(bcos::Error::Ptr, std::vector<std::string>)> callback) override
+    {
+        m_gatewayClient->asyncGetAgencies(callback);
     }
 
     /**

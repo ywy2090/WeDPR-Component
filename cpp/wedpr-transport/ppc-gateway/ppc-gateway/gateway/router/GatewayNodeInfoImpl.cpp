@@ -155,6 +155,17 @@ std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::choo
     bool selectAll, std::string const& topic) const
 {
     std::vector<std::shared_ptr<ppc::front::IFrontClient>> result;
+    // empty topic means broadcast message to all front
+    if (topic.empty())
+    {
+        bcos::ReadGuard l(x_nodeList);
+        for (auto const& it : m_nodeList)
+        {
+            result.emplace_back(it.second->getFront());
+        }
+        return result;
+    }
+    // the topic specified
     bcos::ReadGuard l(x_topicInfo);
     for (auto const& it : m_topicInfo)
     {
@@ -220,4 +231,21 @@ void GatewayNodeInfoImpl::decode(bcos::bytesConstRef data)
             m_nodeList.insert(std::make_pair(nodeInfoPtr->nodeID().toBytes(), nodeInfoPtr));
         }
     }
+}
+
+void GatewayNodeInfoImpl::toJson(Json::Value& jsonObject) const
+{
+    bcos::ReadGuard l(x_nodeList);
+    jsonObject["gatewayNodeID"] = p2pNodeID();
+    jsonObject["agency"] = agency();
+
+    auto agencyNodeList = nodeList();
+    Json::Value frontList(Json::arrayValue);
+    for (auto const& it : agencyNodeList)
+    {
+        Json::Value nodeInfo;
+        it.second->toJson(nodeInfo);
+        frontList.append(nodeInfo);
+    }
+    jsonObject["frontList"] = frontList;
 }

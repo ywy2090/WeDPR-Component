@@ -18,8 +18,9 @@
  * @date 2024-08-26
  */
 #pragma once
-#include "ppc-framework/Common.h"
+#include "ppc-framework/Helper.h"
 #include <bcos-utilities/Common.h>
+#include <json/json.h>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -58,6 +59,8 @@ public:
     {
         return (nodeID() == info->nodeID()) && (components() == info->components());
     }
+
+    virtual void toJson(Json::Value& jsonObject) const = 0;
 };
 class INodeInfoFactory
 {

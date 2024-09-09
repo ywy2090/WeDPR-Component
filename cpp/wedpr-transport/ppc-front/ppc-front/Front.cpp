@@ -19,11 +19,71 @@
  */
 #include "Front.h"
 #include "FrontImpl.h"
+#include "ppc-utilities/Utilities.h"
 
 using namespace ppc;
 using namespace bcos;
 using namespace ppc::protocol;
 using namespace ppc::front;
+
+Front::Front(ppc::front::PPCMessageFaceFactory::Ptr ppcMsgFactory, IFront::Ptr front)
+  : m_messageFactory(std::move(ppcMsgFactory)), m_front(std::move(front))
+{
+    m_fetcher = std::make_shared<bcos::Timer>(60 * 1000, "metaFetcher");
+    m_fetcher->registerTimeoutHandler([this]() {
+        try
+        {
+            fetchGatewayMetaInfo();
+        }
+        catch (std::exception const& e)
+        {
+            FRONT_LOG(WARNING) << LOG_DESC("fetch the gateway information failed")
+                               << LOG_KV("error", boost::diagnostic_information(e));
+        }
+    });
+}
+
+void Front::start()
+{
+    m_front->start();
+    m_fetcher->start();
+}
+
+void Front::stop()
+{
+    m_fetcher->stop();
+    m_front->stop();
+}
+
+void Front::fetchGatewayMetaInfo()
+{
+    auto self = weak_from_this();
+    m_front->asyncGetAgencies([self](bcos::Error::Ptr error, std::vector<std::string> agencies) {
+        auto front = self.lock();
+        if (!front)
+        {
+            return;
+        }
+        if (error && error->errorCode() != 0)
+        {
+            FRONT_LOG(WARNING) << LOG_DESC("asyncGetAgencies failed")
+                               << LOG_KV("code", error->errorCode())
+                               << LOG_KV("msg", error->errorMessage());
+            return;
+        }
+        bcos::UpgradableGuard l(front->x_agencyList);
+        if (front->m_agencyList == agencies)
+        {
+            return;
+        }
+        bcos::UpgradeGuard ul(l);
+        front->m_agencyList = agencies;
+        FRONT_LOG(INFO) << LOG_DESC("Update agencies information")
+                        << LOG_KV("agencies", printVector(agencies));
+    });
+    m_fetcher->restart();
+}
+
 /**
  * @brief: send message to other party by gateway
  * @param _agencyID: agency ID of receiver
@@ -39,14 +99,16 @@ void Front::asyncSendMessage(const std::string& _agencyID, front::PPCMessageFace
     auto routeInfo = front->routerInfoBuilder()->build();
     routeInfo->setDstInst(_agencyID);
     routeInfo->setTopic(_message->taskID());
+    auto type = ((uint16_t)_message->taskType() << 8) | _message->algorithmType();
+    routeInfo->setComponentType(std::to_string(type));
     bcos::bytes data;
     _message->encode(data);
     auto self = weak_from_this();
-    // ROUTE_THROUGH_TOPIC will hold the topic
-    m_front->asyncSendMessage(RouteType::ROUTE_THROUGH_TOPIC, routeInfo, std::move(data),
-        _message->seq(), _timeout, _callback,
-        [self, _agencyID, _respCallback](
-            Error::Ptr error, Message::Ptr msg, SendResponseFunction resFunc) {
+    ppc::protocol::MessageCallback msgCallback = nullptr;
+    if (_respCallback)
+    {
+        msgCallback = [self, _agencyID, _respCallback](
+                          Error::Ptr error, Message::Ptr msg, SendResponseFunction resFunc) {
             auto front = self.lock();
             if (!front)
             {
@@ -68,7 +130,11 @@ void Front::asyncSendMessage(const std::string& _agencyID, front::PPCMessageFace
             // get the agencyID
             _respCallback(error, msg->header()->optionalField()->srcInst(),
                 front->m_messageFactory->decodePPCMessage(msg), responseCallback);
-        });
+        };
+    }
+    // ROUTE_THROUGH_TOPIC will hold the topic
+    m_front->asyncSendMessage(RouteType::ROUTE_THROUGH_TOPIC, routeInfo, std::move(data),
+        _message->seq(), _timeout, _callback, msgCallback);
 }
 
 // send response when receiving message from given agencyID

@@ -18,6 +18,7 @@
  * @date 2024-08-26
  */
 #include "GatewayRouterManager.h"
+#include "ppc-framework/Helper.h"
 #include "ppc-framework/gateway/GatewayProtocol.h"
 #include <ppc-gateway/Common.h>
 
@@ -82,7 +83,6 @@ void GatewayRouterManager::onReceiveNodeSeqMessage(MessageFace::Ptr msg, WsSessi
 {
     auto statusSeq =
         boost::asio::detail::socket_ops::network_to_host_long(*((uint32_t*)msg->payload()->data()));
-
     auto p2pMessage = std::dynamic_pointer_cast<Message>(msg);
     auto const& from = (p2pMessage->header()->srcGwNode().size() > 0) ?
                            p2pMessage->header()->srcGwNode() :
