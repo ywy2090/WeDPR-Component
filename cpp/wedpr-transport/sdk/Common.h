@@ -1,5 +1,5 @@
-/**
- *  Copyright (C) 2021 FISCO BCOS.
+/*
+ *  Copyright (C) 2022 WeDPR.
  *  SPDX-License-Identifier: Apache-2.0
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,30 +14,16 @@
  *  limitations under the License.
  *
  * @file Common.h
- * @author: yujiechen
- * @date 2021-04-12
+ * @author: shawnhe
+ * @date 2022-10-23
  */
-#pragma once
-#include "ppc-framework/Common.h"
-#include "ppc-framework/protocol/GrpcConfig.h"
-#include <grpcpp/grpcpp.h>
 
-namespace ppc::protocol
+#pragma once
+
+#include "ppc-framework/Common.h"
+#include <bcos-utilities/BoostLog.h>
+
+namespace ppc::sdk
 {
-inline grpc::ChannelArguments toChannelConfig(ppc::protocol::GrpcConfig::Ptr const& grpcConfig)
-{
-    grpc::ChannelArguments args;
-    if (grpcConfig == nullptr)
-    {
-        return args;
-    }
-    args.SetLoadBalancingPolicyName(grpcConfig->loadBalancePolicy());
-    if (grpcConfig->enableHealthCheck())
-    {
-        args.SetServiceConfigJSON(
-            "{\"healthCheckConfig\": "
-            "{\"serviceName\": \"\"}}");
-    }
-    return args;
-}
-}  // namespace ppc::protocol
+#define TRANSPORT_LOG(LEVEL) BCOS_LOG(LEVEL) << "[TRASPORT]"
+}  // namespace ppc::sdk
