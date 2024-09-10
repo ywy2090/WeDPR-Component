@@ -32,24 +32,15 @@ void PeerRouterTable::updateGatewayInfo(GatewayNodeInfo::Ptr const& gatewayInfo)
     PEER_ROUTER_LOG(INFO) << LOG_DESC("updateGatewayInfo")
                           << LOG_KV("detail", printNodeStatus(gatewayInfo));
     auto nodeList = gatewayInfo->nodeList();
+
+    removeP2PNodeIDFromNodeIDInfos(gatewayInfo);
+    insertGatewayInfo(gatewayInfo);
+}
+
+void PeerRouterTable::insertGatewayInfo(GatewayNodeInfo::Ptr const& gatewayInfo)
+{
+    auto nodeList = gatewayInfo->nodeList();
     bcos::WriteGuard l(x_mutex);
-    // remove the origin information of the gateway
-    auto it = m_nodeID2GatewayInfos.begin();
-    for (; it != m_nodeID2GatewayInfos.end();)
-    {
-        auto& gatewayInfos = it->second;
-        auto ptr = gatewayInfos.find(gatewayInfo);
-        if (ptr != gatewayInfos.end())
-        {
-            gatewayInfos.erase(ptr);
-        }
-        if (gatewayInfos.empty())
-        {
-            it = m_nodeID2GatewayInfos.erase(it);
-            continue;
-        }
-        it++;
-    }
     // insert new information for the gateway
     for (auto const& it : nodeList)
     {
@@ -68,13 +59,70 @@ void PeerRouterTable::updateGatewayInfo(GatewayNodeInfo::Ptr const& gatewayInfo)
     m_agency2GatewayInfos[gatewayInfo->agency()].insert(gatewayInfo);
 }
 
-std::vector<std::string> PeerRouterTable::agencies() const
+void PeerRouterTable::removeP2PNodeIDFromNodeIDInfos(GatewayNodeInfo::Ptr const& gatewayInfo)
 {
-    std::vector<std::string> agencies;
+    bcos::WriteGuard l(x_mutex);
+    // remove the origin information of the gateway
+    auto it = m_nodeID2GatewayInfos.begin();
+    for (; it != m_nodeID2GatewayInfos.end();)
+    {
+        auto& gatewayInfos = it->second;
+        auto ptr = gatewayInfos.find(gatewayInfo);
+        if (ptr != gatewayInfos.end())
+        {
+            gatewayInfos.erase(ptr);
+        }
+        if (gatewayInfos.empty())
+        {
+            it = m_nodeID2GatewayInfos.erase(it);
+            continue;
+        }
+        it++;
+    }
+}
+
+void PeerRouterTable::removeP2PNodeIDFromAgencyInfos(std::string const& p2pNode)
+{
+    bcos::WriteGuard l(x_mutex);
+    for (auto it = m_agency2GatewayInfos.begin(); it != m_agency2GatewayInfos.end();)
+    {
+        auto& gatewayInfos = it->second;
+        for (auto pGateway = gatewayInfos.begin(); pGateway != gatewayInfos.end();)
+        {
+            if ((*pGateway)->p2pNodeID() == p2pNode)
+            {
+                pGateway = gatewayInfos.erase(pGateway);
+                continue;
+            }
+            pGateway++;
+        }
+        if (gatewayInfos.empty())
+        {
+            it = m_agency2GatewayInfos.erase(it);
+            continue;
+        }
+        it++;
+    }
+}
+
+void PeerRouterTable::removeP2PID(std::string const& p2pNode)
+{
+    PEER_ROUTER_LOG(INFO) << LOG_DESC("PeerRouterTable: removeP2PID")
+                          << LOG_KV("p2pID", printP2PIDElegantly(p2pNode));
+    // remove P2PNode from m_nodeID2GatewayInfos
+    auto gatewayInfo = m_gatewayInfoFactory->build(p2pNode);
+    removeP2PNodeIDFromNodeIDInfos(gatewayInfo);
+    // remove P2PNode from m_agency2GatewayInfos
+    removeP2PNodeIDFromAgencyInfos(p2pNode);
+}
+
+std::set<std::string> PeerRouterTable::agencies() const
+{
+    std::set<std::string> agencies;
     bcos::ReadGuard l(x_mutex);
     for (auto const& it : m_agency2GatewayInfos)
     {
-        agencies.emplace_back(it.first);
+        agencies.insert(it.first);
     }
     return agencies;
 }
