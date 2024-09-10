@@ -138,9 +138,13 @@ void Front::asyncSendMessage(const std::string& _agencyID, front::PPCMessageFace
 }
 
 // send response when receiving message from given agencyID
-void Front::asyncSendResponse(const std::string& _agencyID, std::string const& _uuid,
-    front::PPCMessageFace::Ptr _message, ErrorCallbackFunc _callback)
-{}
+void Front::asyncSendResponse(bcos::bytes const& dstNode, std::string const& traceID,
+    PPCMessageFace::Ptr message, ErrorCallbackFunc _callback)
+{
+    bcos::bytes data;
+    message->encode(data);
+    m_front->asyncSendResponse(dstNode, traceID, std::move(data), 0, _callback);
+}
 
 /**
  * @brief notice task info to gateway
@@ -148,11 +152,43 @@ void Front::asyncSendResponse(const std::string& _agencyID, std::string const& _
  */
 bcos::Error::Ptr Front::notifyTaskInfo(std::string const& taskID)
 {
-    m_front->registerTopic(taskID);
+    return m_front->registerTopic(taskID);
 }
 
 // erase the task-info when task finished
 bcos::Error::Ptr Front::eraseTaskInfo(std::string const& _taskID)
 {
-    m_front->unRegisterTopic(_taskID);
+    FRONT_LOG(INFO) << LOG_DESC("eraseTaskInfo") << LOG_KV("front", m_front);
+    return m_front->unRegisterTopic(_taskID);
+}
+
+// register message handler for algorithm
+void Front::registerMessageHandler(uint8_t _taskType, uint8_t _algorithmType,
+    std::function<void(front::PPCMessageFace::Ptr)> _handler)
+{
+    uint16_t type = ((uint16_t)_taskType << 8) | _algorithmType;
+    auto self = weak_from_this();
+    m_front->registerMessageHandler(
+        std::to_string(type), [self, type, _handler](ppc::protocol::Message::Ptr msg) {
+            auto front = self.lock();
+            if (!front)
+            {
+                return;
+            }
+            try
+            {
+                if (msg == nullptr)
+                {
+                    _handler(nullptr);
+                    return;
+                }
+                _handler(front->m_messageFactory->decodePPCMessage(msg));
+            }
+            catch (std::exception const& e)
+            {
+                FRONT_LOG(WARNING) << LOG_DESC("Call handler for component failed")
+                                   << LOG_KV("componentType", type)
+                                   << LOG_KV("error", boost::diagnostic_information(e));
+            }
+        });
 }

@@ -18,6 +18,7 @@
  * @date 2024-08-26
  */
 #include "GatewayNodeInfoImpl.h"
+#include "ppc-gateway/Common.h"
 #include "wedpr-protocol/protobuf/src/Common.h"
 #include "wedpr-protocol/protobuf/src/NodeInfoImpl.h"
 #include "wedpr-protocol/tars/Common.h"
@@ -152,7 +153,7 @@ std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::choo
 }
 
 std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::chooseRouterByTopic(
-    bool selectAll, std::string const& topic) const
+    bool selectAll, bcos::bytes const& fromNode, std::string const& topic) const
 {
     std::vector<std::shared_ptr<ppc::front::IFrontClient>> result;
     // empty topic means broadcast message to all front
@@ -174,7 +175,8 @@ std::vector<std::shared_ptr<ppc::front::IFrontClient>> GatewayNodeInfoImpl::choo
         {
             selectedNode = nodeInfo(it.first);
         }
-        if (selectedNode != nullptr)
+        // ignore the fromNode
+        if (selectedNode != nullptr && selectedNode->nodeID().toBytes() != fromNode)
         {
             result.emplace_back(selectedNode->getFront());
         }
