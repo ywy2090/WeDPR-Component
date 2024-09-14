@@ -26,12 +26,13 @@ import com.webank.wedpr.sdk.jni.transport.TransportConfig;
 import com.webank.wedpr.sdk.jni.transport.WeDPRTransport;
 import com.webank.wedpr.sdk.jni.transport.handlers.MessageCallback;
 import com.webank.wedpr.sdk.jni.transport.handlers.MessageDispatcherCallback;
+import com.webank.wedpr.sdk.jni.transport.handlers.MessageErrorCallback;
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TransportImpl implements WeDPRTransport {
-    private static Logger logger = LoggerFactory.getLogger(TransportImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransportImpl.class);
     // the created transport
     private final Transport transport;
     private final TransportConfig transportConfig;
@@ -46,6 +47,7 @@ public class TransportImpl implements WeDPRTransport {
     protected TransportImpl(Transport transport, TransportConfig transportConfig) {
         logger.info("Build Transport, config: {}", transportConfig.toString());
         this.transport = transport;
+        this.transport.disOwnMemory();
         this.transportConfig = transportConfig;
     }
 
@@ -105,7 +107,7 @@ public class TransportImpl implements WeDPRTransport {
 
     @Override
     public void registerTopicHandler(String topic, MessageDispatcherCallback messageHandler) {
-        this.transport.getFront().registerTopicHandler(topic, messageHandler);
+        this.transport.getFront().register_topic_handler(topic, messageHandler);
     }
 
     /**
@@ -125,14 +127,14 @@ public class TransportImpl implements WeDPRTransport {
             byte[] payload,
             int seq,
             int timeout,
-            ErrorCallback errorCallback,
+            MessageErrorCallback errorCallback,
             MessageCallback msgCallback) {
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstNode(dstNode, BigInteger.valueOf(dstNode.length));
-        routeInfo.setTopic(topic);
         this.transport
                 .getFront()
-                .asyncSendMessage(
+                .async_send_message(
                         RouteType.ROUTE_THROUGH_NODEID.ordinal(),
                         routeInfo,
                         payload,
@@ -160,14 +162,14 @@ public class TransportImpl implements WeDPRTransport {
             byte[] payload,
             int seq,
             int timeout,
-            ErrorCallback errorCallback,
+            MessageErrorCallback errorCallback,
             MessageCallback msgCallback) {
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
-        routeInfo.setTopic(topic);
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstInst(agency);
         this.transport
                 .getFront()
-                .asyncSendMessage(
+                .async_send_message(
                         RouteType.ROUTE_THROUGH_AGENCY.ordinal(),
                         routeInfo,
                         payload,
@@ -186,16 +188,16 @@ public class TransportImpl implements WeDPRTransport {
             byte[] payload,
             int seq,
             int timeout,
-            ErrorCallback errorCallback,
+            MessageErrorCallback errorCallback,
             MessageCallback msgCallback) {
         // set the routeInfo
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
-        routeInfo.setTopic(topic);
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstInst(dstInst);
         routeInfo.setComponentType(component);
         this.transport
                 .getFront()
-                .asyncSendMessage(
+                .async_send_message(
                         RouteType.ROUTE_THROUGH_COMPONENT.ordinal(),
                         routeInfo,
                         payload,
@@ -222,15 +224,15 @@ public class TransportImpl implements WeDPRTransport {
             byte[] payload,
             int seq,
             int timeout,
-            ErrorCallback errorCallback,
+            MessageErrorCallback errorCallback,
             MessageCallback msgCallback) {
         // set the routeInfo
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
-        routeInfo.setTopic(topic);
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstInst(dstInst);
         this.transport
                 .getFront()
-                .asyncSendMessage(
+                .async_send_message(
                         RouteType.ROUTE_THROUGH_TOPIC.ordinal(),
                         routeInfo,
                         payload,
@@ -252,8 +254,8 @@ public class TransportImpl implements WeDPRTransport {
     @Override
     public void pushByNodeID(String topic, byte[] dstNodeID, int seq, byte[] payload, int timeout)
             throws WeDPRSDKException {
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
-        routeInfo.setTopic(topic);
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstNode(dstNodeID, BigInteger.valueOf(dstNodeID.length));
         Error result =
                 this.transport
@@ -272,8 +274,8 @@ public class TransportImpl implements WeDPRTransport {
     public void pushByComponent(
             String topic, String dstInst, String component, int seq, byte[] payload, int timeout)
             throws WeDPRSDKException {
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
-        routeInfo.setTopic(topic);
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstInst(dstInst);
         routeInfo.setComponentType(component);
         Error result =
@@ -292,8 +294,8 @@ public class TransportImpl implements WeDPRTransport {
     @Override
     public void pushByInst(String topic, String dstInst, int seq, byte[] payload, int timeout)
             throws WeDPRSDKException {
-        MessageOptionalHeader routeInfo = this.transport.routeInfoBuilder().build();
-        routeInfo.setTopic(topic);
+        MessageOptionalHeader routeInfo =
+                IMessageBuilder.buildRouteInfo(this.transport.routeInfoBuilder(), topic);
         routeInfo.setDstInst(dstInst);
         Error result =
                 this.transport
