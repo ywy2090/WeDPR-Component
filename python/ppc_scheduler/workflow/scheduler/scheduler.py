@@ -1,3 +1,4 @@
+import time
 from prefect import Flow
 from prefect.executors import LocalDaskExecutor
 from prefect.triggers import all_successful, any_failed
@@ -6,31 +7,27 @@ from ppc_scheduler.workflow.common import flow_utils
 from ppc_scheduler.workflow.common.job_context import JobContext
 from ppc_scheduler.workflow.common.worker_status import WorkerStatus
 from ppc_scheduler.workflow.common.worker_type import WorkerType
-from ppc_scheduler.workflow.constructor import Constructor
+from ppc_scheduler.workflow.builder.flow_builder import FlowBuilder
 from ppc_scheduler.workflow.worker.worker_factory import WorkerFactory
+from ppc_scheduler.workflow.scheduler.scheduler_api import SchedulerApi
 
 
-class Scheduler:
-    def __init__(self, workspace):
+class Scheduler(SchedulerApi):
+    def __init__(self, workspace, logger):
         self.workspace = workspace
-        self.constructor = Constructor()
+        self.logger = logger
 
-    def schedule_job_flow(self, args):
-        job_context = JobContext.load_from_args(args, self.workspace)
-        flow_context = self.constructor.build_flow_context(job_context)
-        self._run(job_context, flow_context)
-
-    @staticmethod
-    def _run(job_context, flow_context):
-        job_workers = {}
+    def run(self, job_context: JobContext, flow_context: dict):
+ 
         job_id = job_context.job_id
         job_flow = Flow(f"job_flow_{job_id}")
 
-        # create a final job worker to handle success
         finish_job_on_success = WorkerFactory.build_worker(
             job_context,
             flow_utils.success_id(job_id),
-            WorkerType.T_ON_SUCCESS)
+            WorkerType.T_ON_SUCCESS,
+            None
+            )
 
         finish_job_on_success.trigger = all_successful
         finish_job_on_success.bind(worker_status=WorkerStatus.PENDING, worker_inputs=[], flow=job_flow)
@@ -43,17 +40,22 @@ class Scheduler:
         finish_job_on_failure = WorkerFactory.build_worker(
             job_context,
             flow_utils.failure_id(job_id),
-            WorkerType.T_ON_FAILURE)
+            WorkerType.T_ON_FAILURE,
+            None
+            )
 
         # do finish_job_on_failure while any job worker failed
         finish_job_on_failure.trigger = any_failed
         finish_job_on_failure.bind(worker_status=WorkerStatus.PENDING, worker_inputs=[], flow=job_flow)
         job_flow.add_task(finish_job_on_failure)
-
+        
+        job_workers = {}
         # create main job workers
         for worker_id in flow_context:
             worker_type = flow_context[worker_id]['type']
-            job_worker = WorkerFactory.build_worker(job_context, worker_id, worker_type)
+            worker_args = flow_context[worker_id]['args']
+            
+            job_worker = WorkerFactory.build_worker(job_context=job_context, worker_id=worker_id, worker_type=worker_type, worker_args=worker_args)
             job_flow.add_task(job_worker)
             job_workers[worker_id] = job_worker
 
@@ -65,23 +67,34 @@ class Scheduler:
         for worker_id in flow_context:
             # set upstream
             upstreams = flow_context[worker_id]['upstreams']
+            status = flow_context[worker_id]['status']
             for upstream in upstreams:
                 if upstream not in job_workers:
-                    raise Exception(-1, f"upstream job worker not found: {upstream}, "
+                    raise Exception(-1, f"Not found upstream job worker : {upstream}, "
                                         f"job_id: {job_context.job_id}")
                 job_workers[worker_id].set_upstream(job_workers[upstream], flow=job_flow)
-
+                
             # bind worker inputs
             inputs_statement = flow_context[worker_id]['inputs_statement']
             worker_inputs = flow_utils.to_worker_inputs(job_workers, inputs_statement)
-            job_workers[worker_id].bind(worker_status=flow_context[worker_id]['status'],
+            job_workers[worker_id].bind(worker_status=status,
                                         worker_inputs=worker_inputs, flow=job_flow)
 
         # enable parallel execution
         job_flow.executor = LocalDaskExecutor()
 
+        #
+        start_time = time.time()
+
         # run dag workflow
         job_flow_state = job_flow.run()
+        
+        end_time = time.time()
+        
+        self.logger.info(f" ## Job worker result, job: {job_id}, success: {job_flow_state.is_successful()}, costs: {end_time - start_time}, flow_state: {job_flow_state}")
 
         # save workflow view as file
         job_flow.visualize(job_flow_state, job_context.workflow_view_path, 'svg')
+        
+        if not job_flow_state.is_successful():
+            raise Exception(-1, f"Job run failed, job_id: {job_id}")
