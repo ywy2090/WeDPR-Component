@@ -20,7 +20,8 @@ class WorkerFactory:
             return PythonWorker(components, job_context, worker_id, worker_type, worker_args, *args, *kwargs)
         elif worker_type == WorkerType.T_SHELL:
             return ShellWorker(components, job_context, worker_id, worker_type, worker_args, *args, **kwargs)
-        elif worker_type == WorkerType.T_PSI:
+        elif worker_type == WorkerType.T_PSI or \
+            worker_type == WorkerType.T_ML_PSI:
             return PsiWorker(components, job_context, worker_id, worker_type, worker_args, *args, **kwargs)
         elif worker_type == WorkerType.T_MPC:
             return MpcWorker(components, job_context, worker_id, worker_type, worker_args, *args, **kwargs)

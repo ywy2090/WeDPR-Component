@@ -25,6 +25,8 @@ class PsiClient:
         if type(params) == str:
             params = json.loads(params) 
         
+        task_id = params['taskID']
+        
         json_rpc_request = {
             'jsonrpc': '1',
             'method': 'asyncRunTask',
@@ -34,9 +36,9 @@ class PsiClient:
         }
         response = self._send_request_with_retry(http_utils.send_post_request, self.endpoint, None, json_rpc_request)
         check_privacy_service_response(response)
-        return self._poll_task_status(params['taskID'])
+        return self._poll_task_status(task_id)
 
-    def _poll_task_status(self, task_id):
+    def _poll_task_status(self, task_id: str):
         while True:
             params = {
                 'jsonrpc': '1',

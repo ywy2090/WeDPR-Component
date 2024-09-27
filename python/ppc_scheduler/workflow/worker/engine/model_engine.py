@@ -1,4 +1,3 @@
-import os
 import time
 
 from ppc_scheduler.workflow.common.job_context import JobContext
@@ -29,7 +28,7 @@ class ModelWorkerEngine(WorkerEngine):
         self.logger.info(f"## model engine run begin, job_id={job_id}, worker_id={self.worker_id}, args: {args}")
         
         # send job request to model node and wait for the job to finish
-        # self.psi_client.run(*args)
+        self.model_client.run(*args)
         
         time_costs = time.time() - start_time
         self.logger.info(f"## model engine run finished, job_id={job_id}, timecost: {time_costs}s")
