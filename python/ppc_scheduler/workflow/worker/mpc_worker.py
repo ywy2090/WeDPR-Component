@@ -1,4 +1,4 @@
-from ppc_scheduler.node.computing_node_client.mpc_node_client import MpcClient
+from ppc_scheduler.node.computing_node_client.mpc_client import MpcClient
 from ppc_scheduler.workflow.worker.engine.mpc_engine import MpcWorkerEngine
 from ppc_scheduler.workflow.worker.worker import Worker
 

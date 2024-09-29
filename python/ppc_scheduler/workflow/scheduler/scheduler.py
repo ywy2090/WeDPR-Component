@@ -94,7 +94,7 @@ class Scheduler(SchedulerApi):
         self.logger.info(f" ## Job worker result, job: {job_id}, success: {job_flow_state.is_successful()}, costs: {end_time - start_time}, flow_state: {job_flow_state}")
 
         # save workflow view as file
-        job_flow.visualize(job_flow_state, job_context.workflow_view_path, 'svg')
+        job_flow.visualize(job_flow_state, job_id + "_" + job_context.workflow_view_path, 'svg')
         
         if not job_flow_state.is_successful():
             raise Exception(-1, f"Job run failed, job_id: {job_id}")
