@@ -69,7 +69,7 @@ class AsyncThreadExecutor(AsyncExecutor):
         for target_id in finished_threads:
             with self.lock:
                 del self.threads[target_id]
-            self.logger.info(f"cleanup finished thread {target_id}")
+            self.logger.info(f"Cleanup finished thread {target_id}")
 
     def __del__(self):
         self.kill_all()

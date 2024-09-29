@@ -6,6 +6,7 @@ class WorkerType:
 
     # specific job worker
     T_PSI = 'PSI'
+    T_ML_PSI = 'ML_PSI'
     T_MPC = 'MPC'
     T_PREPROCESSING = 'PREPROCESSING'
     T_FEATURE_ENGINEERING = 'FEATURE_ENGINEERING'
