@@ -9,11 +9,14 @@ class MpcWorker(Worker):
         super().__init__(components, job_context, worker_id, worker_type, worker_args, *args, **kwargs)
 
     def engine_run(self, worker_inputs) -> list:
-        node_endpoint = self.node_manager.get_node(self.worker_type)
-        mpc_client = MpcClient(node_endpoint)
+        # TODO:
+        logger = self.components.logger()
+        mpc_client_node = self.computing_node_manager.get_node(self.worker_type)
+        logger.info(f"## getting mpc client : {mpc_client_node}")
+        mpc_client = MpcClient(mpc_client_node)
         mpc_engine = MpcWorkerEngine(mpc_client, self.worker_type, self.components, self.job_context)
         try:
             outputs = mpc_engine.run()
             return outputs
         finally:
-            self.node_manager.release_node(node_endpoint, self.worker_type)
+            self.computing_node_manager.release_node(mpc_client_node[2])

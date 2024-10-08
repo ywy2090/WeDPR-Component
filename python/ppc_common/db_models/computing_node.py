@@ -3,7 +3,7 @@ from ppc_common.db_models import db
 
 
 class ComputingNodeRecord(db.Model):
-    __tablename__ = 'wedpr_computing_node'
+    __tablename__ = 'wedpr_computing_node_table'
     id = db.Column(db.String(255), primary_key=True)
     url = db.Column(db.String(255))
     type = db.Column(db.String(255))

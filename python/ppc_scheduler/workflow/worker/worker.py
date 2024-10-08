@@ -6,7 +6,7 @@ from prefect.engine import signals
 
 from ppc_scheduler.common import log_utils
 from ppc_scheduler.database import job_worker_mapper
-from ppc_scheduler.node.node_manager import ComputingNodeManager
+from ppc_scheduler.node.computing_node_manager import ComputingNodeManager
 from ppc_scheduler.workflow.common import codec, flow_utils
 from ppc_scheduler.workflow.common.worker_status import WorkerStatus
 from ppc_scheduler.workflow.common.worker_type import WorkerType
@@ -16,7 +16,7 @@ class Worker(Task):
     def __init__(self, components, job_context, worker_id, worker_type, worker_args, retries=0, retry_delay_s=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.components = components
-        self.node_manager = ComputingNodeManager(components)
+        self.computing_node_manager = ComputingNodeManager(components)
         self.logger = components.logger()
         self.job_context = job_context
         self.worker_id = worker_id

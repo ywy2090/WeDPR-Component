@@ -1,5 +1,5 @@
 from sqlalchemy import update, and_, select, delete
-
+from sqlalchemy.exc import NoResultFound
 from ppc_common.db_models.computing_node import ComputingNodeRecord
 
 
@@ -32,17 +32,18 @@ from ppc_common.db_models.computing_node import ComputingNodeRecord
 def get_and_update_min_loading_url(session, node_type):
     
     # select min_loading node
-    min_loading_node_id = session.query(ComputingNodeRecord.id).filter(
+    min_loading_node = session.query(ComputingNodeRecord.url, ComputingNodeRecord.token, ComputingNodeRecord.id).filter(
         ComputingNodeRecord.type == node_type
     ).order_by(ComputingNodeRecord.loading.asc()).first()
-
-
+    
+    if min_loading_node is None:
+        raise NoResultFound("No computing node found with the specified node type and minimum loading, node type is: " + node_type)
+    
     # update loading
     stmt = (
         update(ComputingNodeRecord).where(
             and_(
-                ComputingNodeRecord.id == min_loading_node_id.id,
-                ComputingNodeRecord.type == node_type
+                ComputingNodeRecord.id == min_loading_node.id
             )
         ).values(
             loading=ComputingNodeRecord.loading + 1
@@ -50,19 +51,13 @@ def get_and_update_min_loading_url(session, node_type):
     )
     session.execute(stmt)
 
-    # select min_loading node
-    record = session.query(ComputingNodeRecord.url, ComputingNodeRecord.token).filter(
-        ComputingNodeRecord.id == min_loading_node_id.id
-    ).order_by(ComputingNodeRecord.loading.asc()).first()
-    
-    return record
+    return min_loading_node
 
-def release_loading(session, url: str, node_type: str):
+def release_loading(session, node_id: str):
     stmt = (
         update(ComputingNodeRecord).where(
             and_(
-                ComputingNodeRecord.url == url,
-                ComputingNodeRecord.type == node_type,
+                ComputingNodeRecord.id == node_id,
                 ComputingNodeRecord.loading > 0
             )
         ).values(
