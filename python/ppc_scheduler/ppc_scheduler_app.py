@@ -17,6 +17,7 @@ print(sys.path)
 
 from ppc_scheduler.endpoints.restx import api
 from ppc_scheduler.endpoints.job_controller import ns as job_namespace
+from ppc_scheduler.endpoints.sql_controller import ns as sql_namespace
 from ppc_common.ppc_async_executor.thread_event_manager import ThreadEventManager
 from ppc_scheduler.job.job_manager import JobManager
 from ppc_scheduler.workflow.scheduler.scheduler import Scheduler
@@ -84,6 +85,7 @@ def initialize_app(app, config_path, log_config_path):
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
     api.add_namespace(job_namespace)
+    api.add_namespace(sql_namespace)
     app.register_blueprint(blueprint)
     
     components.logger().info(app.url_map)
