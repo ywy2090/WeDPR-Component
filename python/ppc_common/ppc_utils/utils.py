@@ -35,6 +35,10 @@ MPC_MAX_FIELD_COUNT = 50
 
 BASE_RESPONSE = {'errorCode': PpcErrorCode.SUCCESS.get_code(
 ), 'message': PpcErrorCode.SUCCESS.get_msg()}
+
+INTERNAL_ERROR_RESPONSE = {'errorCode': PpcErrorCode.INTERNAL_ERROR.get_code(
+), 'message': PpcErrorCode.INTERNAL_ERROR.get_msg()}
+
 LOG_NAME = 'ppcs-modeladm-scheduler.log'
 LOG_CHARACTER_NUMBER = 100000
 CSV_SEP = ','
@@ -380,6 +384,41 @@ def verify_signature(message, signature, public_key_str, crypto_type):
     if crypto_type == CryptoType.GM:
         return verify_with_sm2(message, signature, public_key_str)
 
+def replace(filepath, old, new):
+    """[replace old string to new from filepath]
+
+    Arguments:
+        filepath {[path]} -- [file path that needs to be replaced]
+        old {[string]} -- [old string]
+        new {[string]} -- [new string]
+    """
+    if not os.path.exists(filepath):
+        return False
+
+    cmd = "sed -i 's|%s|%s|g' %s " % (old, new, filepath)
+
+    status, output = exec_bash_command(cmd)
+    if status != 0:
+        return False
+    return True
+
+def replace(filepath, new, old=MPC_RECORD_PLACE_HOLDER):
+    """[replace old string to new from filepath]
+
+    Arguments:
+        filepath {[path]} -- [file path that needs to be replaced]
+        old {[string]} -- [old string]
+        new {[string]} -- [new string]
+    """
+    if not os.path.exists(filepath):
+        return False
+
+    cmd = "sed -i 's|%s|%s|g' %s " % (old, new, filepath)
+
+    status, output = exec_bash_command(cmd)
+    if status != 0:
+        return False
+    return True
 
 def exec_bash_command(cmd):
     """replace commands.get_status_output

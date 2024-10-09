@@ -93,6 +93,7 @@ class TestGenerator(unittest.TestCase):
                    INNER JOIN source1 AS s1 ON s0.id = s1.id)\
                INNER JOIN source2 AS s2 ON s0.id = s2.id\
                GROUP BY s1.field4;"
+        print(sql)
         code_generator = CodeGenerator(sql)
         self.assertEqual(GROUP_BY_SAMPLE_STR, code_generator.sql_to_mpc_code())
 

@@ -13,7 +13,7 @@ class PsiWorker(Worker):
         psi_client_node = self.computing_node_manager.get_node(self.worker_type)
         logger.info(f"## getting psi client : {psi_client_node}")
         psi_client = PsiClient(logger, psi_client_node.url, psi_client_node.token)
-        psi_engine = PsiWorkerEngine(psi_client, self.worker_id, self.worker_type, self.components, self.job_context)
+        psi_engine = PsiWorkerEngine(psi_client, self.worker_type, self.worker_id, self.components, self.job_context)
         try:
             outputs = psi_engine.run(*self.worker_args)
             return outputs

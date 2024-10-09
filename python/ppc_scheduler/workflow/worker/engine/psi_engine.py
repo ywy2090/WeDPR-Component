@@ -8,7 +8,7 @@ from ppc_scheduler.workflow.worker.engine.work_engine import WorkerEngine
 
 
 class PsiWorkerEngine(WorkerEngine):
-    def __init__(self, psi_client, worker_id, worker_type, components, job_context: JobContext):
+    def __init__(self, psi_client, worker_type, worker_id, components, job_context: JobContext):
         self.psi_client = psi_client
         self.worker_id = worker_id
         self.worker_type = worker_type

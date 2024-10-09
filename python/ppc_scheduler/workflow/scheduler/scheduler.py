@@ -13,8 +13,7 @@ from ppc_scheduler.workflow.scheduler.scheduler_api import SchedulerApi
 
 
 class Scheduler(SchedulerApi):
-    def __init__(self, workspace, logger):
-        self.workspace = workspace
+    def __init__(self, logger):
         self.logger = logger
 
     def run(self, job_context: JobContext, flow_context: dict):

@@ -32,11 +32,19 @@ class SqlCollection(Resource):
         components.logger().info(f"Recv SQL conversion to MPC code request, sql: {sql}, request: {request_body}")
         
         code_generator = CodeGenerator(sql)
-        mpc_code = code_generator.sql_to_mpc_code()
-        
-        response = utils.BASE_RESPONSE
-        response['data'] = {
-            'mpc_code': mpc_code
-        }
+        try:
+            mpc_code = code_generator.sql_to_mpc_code()
+            
+            response = utils.BASE_RESPONSE
+            response['data'] = {
+                'mpcContent': mpc_code
+            }
 
-        return response
+            return response
+        except PpcException as e:
+            components.logger().error(f"PpcException: {e}, request: {request_body}")
+            return e.to_dict()
+        except Exception as e:
+            components.logger().error(f"unexpected exception: {e}, request: {request_body}")
+            return utils.INTERNAL_ERROR_RESPONSE
+        

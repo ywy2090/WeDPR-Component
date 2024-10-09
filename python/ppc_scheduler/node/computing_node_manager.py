@@ -7,6 +7,7 @@ class ComputingNodeManager:
         WorkerType.T_PSI: 'PSI',
         WorkerType.T_ML_PSI: 'PSI',
         WorkerType.T_MPC: 'MPC',
+        WorkerType.T_MPC_PSI: 'PSI',
         WorkerType.T_PREPROCESSING: 'MODEL',
         WorkerType.T_FEATURE_ENGINEERING: 'MODEL',
         WorkerType.T_TRAINING: 'MODEL',

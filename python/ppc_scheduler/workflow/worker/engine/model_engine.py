@@ -33,20 +33,4 @@ class ModelWorkerEngine(WorkerEngine):
         time_costs = time.time() - start_time
         self.logger.info(f"## model engine run finished, job_id={job_id}, timecost: {time_costs}s")
         
-        # args = {
-        #     'job_id': job_id,
-        #     'task_id': task_id,
-        #     'task_type': 'PREPROCESSING',
-        #     'dataset_id': self.job_context.dataset_id,
-        #     'dataset_storage_path': dataset_storage_path,
-        #     'job_algorithm_type': self.job_context.job_type,
-        #     'need_run_psi': self.job_context.need_run_psi,
-        #     'model_dict': self.job_context.model_config_dict
-        # }
-        # self.log.info(f"start prepare_xgb, job_id: {job_id}, task_id: {task_id}, args: {args}")
-        # self.model_client.run(args)
-        # self.log.info(
-        #     f"call compute_xgb_job service success, job: {job_id}, "
-        #     f"task_id: {task_id}, timecost: {time.time() - start}")
-        
         return []

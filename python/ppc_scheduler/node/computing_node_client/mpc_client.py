@@ -5,14 +5,15 @@ from ppc_scheduler.node.computing_node_client.utils import check_privacy_service
 
 
 class MpcClient:
-    def __init__(self, endpoint):
+    def __init__(self, endpoint, token):
         self.endpoint = endpoint
+        self.token = token
 
-    def run(self, job_info, token):
+    def run(self, job_info):
         params = {
             'jsonrpc': '2',
             'method': 'run',
-            'token': token,
+            'token': self.token,
             'id': random.randint(1, 65535),
             'params': job_info
         }
@@ -20,11 +21,11 @@ class MpcClient:
         check_privacy_service_response(response)
         return response['result']
 
-    def kill(self, job_id, token):
+    def kill(self, job_id):
         params = {
             'jsonrpc': '2',
             'method': 'kill',
-            'token': token,
+            'token': self.token,
             'id': random.randint(1, 65535),
             'params': {'jobId': job_id}
         }

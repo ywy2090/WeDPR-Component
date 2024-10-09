@@ -15,7 +15,7 @@ class HdfsStorage(StorageApi):
 
     def __init__(self, endpoint, hdfs_user, hdfs_home=None):
 
-        # self.client = Client('http://127.0.0.1:9870')
+        # self.client = Client('http://127.0.0.1:50070')
         self.endpoint = endpoint
         self._user = common_func.get_config_value(
             "HDFS_USER", HdfsStorage.DEFAULT_HDFS_USER, hdfs_user, False)

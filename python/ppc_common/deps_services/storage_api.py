@@ -5,6 +5,7 @@ from typing import AnyStr
 
 class StorageType(Enum):
     HDFS = 'HDFS'
+    LOCAL = 'LOCAL'
 
 
 class StorageApi(ABC):

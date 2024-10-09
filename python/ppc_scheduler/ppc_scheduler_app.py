@@ -34,14 +34,14 @@ def init_thread_event_manager():
     thread_event_manager = ThreadEventManager()
     return thread_event_manager
 
-def init_scheduler(config_data, workspace: str, logger):
-    scheduler_api = Scheduler(workspace, logger=logger)
-    return scheduler_api
-
-def init_job_manager(config_data, workspace: str, thread_event_manager: ThreadEventManager, scheduler: SchedulerApi, logger):
+def init_job_manager(config_data, workspace: str, thread_event_manager: ThreadEventManager, logger):
         
     job_timeout_h = config_data['JOB_TIMEOUT_H']
     
+    # create scheduler
+    scheduler = Scheduler(logger=logger)
+    
+    # create job manager
     job_manager = JobManager(
         logger=logger,
         scheduler=scheduler,
@@ -68,11 +68,8 @@ def initialize_app(app, config_path, log_config_path):
     # event manager
     thread_event_manager = init_thread_event_manager()
     
-    # scheduler
-    scheduler = init_scheduler(config_data=config_data, workspace=workspace, logger=logger)
-    
     # job manager
-    job_manager = init_job_manager(config_data=config_data, workspace=workspace, thread_event_manager=thread_event_manager, scheduler=scheduler, logger=logger)
+    job_manager = init_job_manager(config_data=config_data, workspace=workspace, thread_event_manager=thread_event_manager, logger=logger)
     
     update_job_manager(job_manager)
     

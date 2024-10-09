@@ -94,12 +94,10 @@ class Worker(Task):
                         self.logger.exception(e)
                         time.sleep(self.retry_delay_s)
         else:
-            # outputs = self.engine_run(inputs)
             self.logger.info(log_utils.worker_start_log_info(self.worker_id))
             outputs = self.engine_run(inputs)
             self.logger.info(log_utils.worker_end_log_info(self.worker_id))
             end_time = time.time()
-            # self.logger.info(f"Worker try run task end, job_id: {self.job_context.job_id}, worker: {self.worker_id}, elapsed time: {end_time - start_time}, outputs: {outputs}")
             return outputs
 
     def _load_output_from_db(self):
